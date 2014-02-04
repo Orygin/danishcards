@@ -20,6 +20,11 @@ gameChat.prototype.parseCommand = function(socket, msg) {
 		this.gameRules.renewHand(socket);
 		return {isCommand:true, message: "giffen new cards"};
 	}
+	if(msg == "/plsrdy")
+	{
+		this.io.sockets.emit('play sound rdy');
+		return {isCommand:true, message: "Please ready up!"};
+	}
 		
 };
 

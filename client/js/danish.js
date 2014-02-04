@@ -23,6 +23,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		if(!$scope.muted)
 			$scope.stackCutSound.play();
 	});
+	$scope.$on('plsrdy', function(){
+		if(!$scope.muted)
+			$scope.plsRdy.play();
+	});
 })
 
 .controller('Main', function ($scope){
@@ -116,6 +120,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			$scope.$apply(function () {
 				$scope.players[$scope.players.length] = {name:pName, ready: false, tableHand: 0, tappedHand: [], playingHand: 0};
 				$scope.glog += 'User connected : ' + pName + '\n';
+				$scope.$broadcast('connected');
 			});
 		});
 		socket.on('user disconnected', function (pName) {
@@ -186,6 +191,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			$scope.$apply(function () {
 				$scope.playerTurn = plr;
 				$scope.glog += 'Player turn : ' + plr +'\n';
+				if(plr == $scope.playerName)
+					$scope.$broadcast('selfTurn');
+				else
+					$scope.$broadcast('playerTurn');
 			})
 		});
 		socket.on('draw card', function (card) {
@@ -247,6 +256,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			$scope.$apply(function () {
 				$scope.glog += 'Stack cut : ' + $scope.playingStack.length + '\n';
 				$scope.playingStack = [];
+				$scope.$broadcast('stackCut');
 			});
 		});
 		socket.on('select ace target', function () {
@@ -291,6 +301,11 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		socket.on('chat command', function (data) {
 			$scope.$apply(function () {
 				$scope.gchat += data.message + "\n";
+			});
+		});
+		socket.on('play sound rdy', function () {
+			$scope.$apply(function() {
+				$scope.$broadcast('plsrdy');
 			});
 		});
 	}
