@@ -1,17 +1,26 @@
 function gameChat() {
 	this.io = {};
+	this.gameRules = {};
 }
 gameChat.prototype.rcvChat = function(socket, msg) {
-	if(!this.tryCommand(msg))
+	var cmd = this.parseCommand(socket, msg);
+
+	if(!cmd.isCommand)
 		this.io.sockets.emit('chat message', {player: socket.player.name, message: msg});
-};
-gameChat.prototype.tryCommand = function(msg) {
-	if(msg[0] == '/')
-	{
-		return true
-	}
 	else
-		return false;
+		socket.emit('chat command', cmd);
+};
+
+gameChat.prototype.parseCommand = function(socket, msg) {
+	if(msg[0] != '/')
+		return {isCommand: false};
+	
+	if(msg == "/giffcards")
+	{
+		this.gameRules.renewHand(socket);
+		return {isCommand:true, message: "giffen new cards"};
+	}
+		
 };
 
 module.exports = new gameChat();

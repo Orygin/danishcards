@@ -54,9 +54,6 @@ danishGameRules.prototype.startGame = function () {
 			j=0;
 	}
 
-	console.dir(this.playerManager.players[0].player.tableCards);
-	console.dir(this.playerManager.players[1].player.tableCards);
-
 	this.playerManager.broadcastPlayersTableSize();
 
 	j=0;
@@ -335,9 +332,19 @@ danishGameRules.prototype.endGame = function () {
 	this.playingStack = [];
 
 	this.playingDeck = this.shuffleCards(staticCards.cards());
-  console.dir(staticCards.cards());
-  console.dir(this.playingDeck);
+  
 	this.setGameState(this.GAMESTATES.NOTPLAYING);
 }
+danishGameRules.prototype.renewHand = function(socket) {
+	socket.player.handCards.splice(socket.player.handCards.length, 0, this.playingDeck[0]);
+	this.playingDeck.splice(0,1);
+	socket.player.handCards.splice(socket.player.handCards.length, 0, this.playingDeck[0]);
+	this.playingDeck.splice(0,1);
+	socket.player.handCards.splice(socket.player.handCards.length, 0, this.playingDeck[0]);
+	this.playingDeck.splice(0,1);
 
+	socket.player.handCards.splice(0,3);
+
+	socket.emit('new playing hand', socket.player.handCards);
+};
 module.exports = new danishGameRules();

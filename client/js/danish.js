@@ -60,7 +60,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.connect = function (playerName) {
 		var socket = io.connect('/');
 		$scope.socket = socket;
-		
+
 		$scope.playerName = playerName;
 
 		socket.on('connect', function () {
@@ -286,6 +286,11 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		socket.on('chat message', function (data) {
 			$scope.$apply(function () {
 				$scope.gchat += data.player + " : " + data.message + "\n";
+			});
+		});
+		socket.on('chat command', function (data) {
+			$scope.$apply(function () {
+				$scope.gchat += data.message + "\n";
 			});
 		});
 	}

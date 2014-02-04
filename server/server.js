@@ -11,6 +11,7 @@ var express = require('express')
   gameRules.playerManager = playerManager;
   gameRules.io = io;
   gameChat.io = io;
+  gameChat.gameRules = gameRules;
   playerManager.gameRules = gameRules;
 
 process.env.PWD = process.cwd()
