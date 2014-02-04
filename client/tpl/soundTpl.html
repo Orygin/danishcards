@@ -1,0 +1,19 @@
+<div ng-controller="Sound" >
+	<audio audio-player player-control="playerTurnSound" preload>
+		<source type="audio/mpeg" src="sound/player.mp3">
+	</audio>
+	<audio audio-player player-control="selfTurnSound" preload>
+		<source type="audio/mpeg" src="sound/self.mp3">
+	</audio>
+	<audio audio-player player-control="stackCutSound" preload>
+		<source type="audio/mpeg" src="sound/cut.mp3">
+	</audio>
+	<audio audio-player player-control="connectedSound" preload>
+		<source type="audio/mpeg" src="sound/connect.mp3">
+	</audio>
+
+	<div ng-click="toggleMute()" style="cursor:pointer">
+		<i ng-show="muted" class="glyphicon glyphicon-volume-off"></i>
+		<i ng-show="!muted" class="glyphicon glyphicon-volume-up"></i>
+	</div>
+</div>

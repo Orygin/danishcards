@@ -1,0 +1,60 @@
+@import url(http://fonts.googleapis.com/css?family=Alegreya+Sans+SC:400,900);
+body
+{
+	font-family: 'Alegreya Sans SC', sans-serif;
+	font-weight: 400; 
+}
+.selected
+{
+	position: relative;
+	bottom:15px;
+}
+.playerBox
+{
+	border: 1px solid black;
+	width:48%;
+	display: inline-block;
+	min-height: 288px;
+	margin-right: auto;
+	margin-left: auto;
+	vertical-align: bottom;
+}
+.logger
+{
+	float:left;
+}
+.playerList
+{
+	float:right;
+	margin-right: 75px;
+}
+.playingStack
+{
+	min-height: 96px;
+}
+.connexionBox
+{
+	width: 300px;
+	padding: 5px;
+	height: 82px;
+	margin-top: 50px;
+	margin-right: auto;
+	margin-left: auto;
+	border: 1px solid black;
+	box-shadow: 1px 1px 1px 1px;
+	text-align: center;
+	vertical-align: middle;
+}
+.connexionBox input
+{
+	text-align: center;
+}
+.title
+{
+	text-align: center;
+	font-size: 89px;
+	font-weight: 900;
+	width: 300px;
+	margin-right: auto;
+	margin-left: auto;
+}
