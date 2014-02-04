@@ -9,8 +9,7 @@
 		<div ng-repeat="plr in players">
 			{{$index + 1}} - {{plr.name}} <i class="glyphicon glyphicon-ok" ng-show="plr.ready && gameState.name == 'Not Playing'"></i> <span ng-show="shouldTarget && plr.name != playerName && hasCards($index)"><a href="#" ng-click="aceTarget(plr.name)"><i class="glyphicon glyphicon-font"></i></a></span> <i class="glyphicon glyphicon-arrow-left" ng-show="plr.name == playerTurn && !shouldTarget"></i>
 		</div>
-	</div><br>
-	<div class="chat">
+		<br>
 		<textarea scroll-glue ng-model="gchat" cols="50" rows="20" disabled="disabled"></textarea><br>
 		<input z-keypress="alert($event)" style="width: 100%">
 	</div>
