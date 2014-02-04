@@ -336,9 +336,12 @@ danishGameRules.prototype.endGame = function () {
 	this.setGameState(this.GAMESTATES.NOTPLAYING);
 }
 danishGameRules.prototype.renewHand = function(socket) {
+	if(this.gameState.value != 2)
+		return;
+	
 	this.playingDeck.splice(this.playingDeck.length, 0, socket.player.handCards);
 	socket.player.handCards.splice(0,3);
-	
+
 	socket.player.handCards.splice(socket.player.handCards.length, 0, this.playingDeck[0]);
 	this.playingDeck.splice(0,1);
 	socket.player.handCards.splice(socket.player.handCards.length, 0, this.playingDeck[0]);
