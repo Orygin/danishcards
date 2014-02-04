@@ -9,15 +9,22 @@
 		<div ng-repeat="plr in players">
 			{{$index + 1}} - {{plr.name}} <i class="glyphicon glyphicon-ok" ng-show="plr.ready && gameState.name == 'Not Playing'"></i> <span ng-show="shouldTarget && plr.name != playerName && hasCards($index)"><a href="#" ng-click="aceTarget(plr.name)"><i class="glyphicon glyphicon-font"></i></a></span> <i class="glyphicon glyphicon-arrow-left" ng-show="plr.name == playerTurn && !shouldTarget"></i>
 		</div>
+	</div><br>
+	<div class="chat">
+		<textarea scroll-glue ng-model="gchat" cols="50" rows="20" disabled="disabled"></textarea><br>
+		<input z-keypress="alert($event)" style="width: 100%">
 	</div>
 	Game status : {{gameState.name}}. Deck size left : {{pickingStackSize}}<br>
 	<div class="playingStack"><img ng-repeat="card in playingStack track by $index" ng-src="img/cards/{{card.img}}.png"/></div><br>
+
 	Your hand :
 	<img ng-repeat="card in playingHand track by $index" ng-src="img/cards/{{card.img}}.png" ng-click="handCardClick(card, $index)" ng-class="{selected: isCardSelected(card)}" /><br>
 	Your tapped cards :
 	<img ng-repeat="card in tappedHand track by $index" ng-src="img/cards/{{card.img}}.png" ng-click="tappedCardClick(card, $index)" ng-class="{selected: isCardSelected(card)}" /><br>
 	Your table cards :
 	<img ng-repeat="i in getNumber(tableHand) track by $index" src="img/cards/b1fv.png" ng-click="tableCardClick($index)"/>
+
 	<a href="#" ng-click="takeStack()">Take stack</a> - <a href="#" ng-click="playSelected()">Play card(s)</a>
+
 	<div ng-include="'tpl/soundTpl.html'"></div>
 </div>

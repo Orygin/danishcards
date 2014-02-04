@@ -1,36 +1,31 @@
-var app = angular.module('danish', ['ui.bootstrap', 'luegg.directives', 'angular-audio-player']);
+var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.directives', 'angular-audio-player'])
 
-app.controller('Sound', function ($scope){
+.controller('Sound', function ($scope){
 	$scope.muted = false;
-	$scope.playlistVariable = [];
 
 	$scope.toggleMute = function () {
 		$scope.muted = !$scope.muted;
 	}
 
 	$scope.$on('connected', function(){
-		$scope.connectedSound.setVolume(0.3);
 		if(!$scope.muted)
-			$scope.connectedSound.play();
+			$scope.connectSound.play();
 	});
 	$scope.$on('selfTurn', function () {
-		$scope.selfTurnSound.setVolume(0.3);
 		if(!$scope.muted)
 			$scope.selfTurnSound.play();
 	});
 	$scope.$on('playerTurn', function(){
-		$scope.playerTurnSound.setVolume(0.3);
 		if(!$scope.muted)
 			$scope.playerTurnSound.play();
 	});
 	$scope.$on('stackCut', function(){
-		$scope.stackCutSound.setVolume(0.3);
 		if(!$scope.muted)
 			$scope.stackCutSound.play();
 	});
-});
+})
 
-app.controller('Main', function ($scope){
+.controller('Main', function ($scope){
 	$scope.alerts = [];
 	$scope.addAlert = function(mesg, level) {
 		$scope.alerts.push({msg: mesg, type: level});
@@ -55,40 +50,42 @@ app.controller('Main', function ($scope){
 	$scope.isReady = false;
 	$scope.playingStack = [];
 	$scope.glog = "";
+	$scope.gchat = "";
 	$scope.selectedCards = [];
 	$scope.shouldTarget = false;
 	$scope.shouldPlaySmall = false;
 	$scope.playerName = "Anonymousse";
+	$scope.chatLine = "";
 
 	$scope.connect = function (playerName) {
 		var socket = io.connect('/');
 		$scope.socket = socket;
+		
+		$scope.playerName = playerName;
 
 		socket.on('connect', function () {
 			$scope.$apply(function () {
 				$scope.connectionStatus = "connected";
 				$scope.glog += 'Connected \n';
-				$scope.$broadcast('connected');
-				$scope.playerName = playerName;
 			});
 			socket.emit('setPlayerName', playerName);
 		});
 
 		socket.on('error', function (name, value) {
-      $scope.$apply(function(){
-        if(name == 'too many players')
-        {
-          $scope.connectionStatus = "disconnected";
-          $scope.addAlert('Too many players already. You can still observe', 'danger');
-          socket.disconnect();
-        }
-        else if (name == 'name already in use')
-        {
-          $scope.connectionStatus = "disconnected";
-          $scope.addAlert('name already in use', 'danger');
-          socket.disconnect();
-        }
-      });
+	    	$scope.$apply(function(){
+		        if(name == 'too many players')
+		        {
+		          $scope.connectionStatus = "disconnected";
+		          $scope.addAlert('Too many players already. You can still observe', 'danger');
+		          socket.disconnect();
+		        }
+		        else if (name == 'name already in use')
+		        {
+		          $scope.connectionStatus = "disconnected";
+		          $scope.addAlert('name already in use', 'danger');
+		          socket.disconnect();
+		        }
+      		});
 		});
 
 		socket.on('currentState', function (data) {
@@ -119,7 +116,6 @@ app.controller('Main', function ($scope){
 			$scope.$apply(function () {
 				$scope.players[$scope.players.length] = {name:pName, ready: false, tableHand: 0, tappedHand: [], playingHand: 0};
 				$scope.glog += 'User connected : ' + pName + '\n';
-				$scope.$broadcast('connected');
 			});
 		});
 		socket.on('user disconnected', function (pName) {
@@ -190,10 +186,6 @@ app.controller('Main', function ($scope){
 			$scope.$apply(function () {
 				$scope.playerTurn = plr;
 				$scope.glog += 'Player turn : ' + plr +'\n';
-				if($scope.playerName == plr)
-					$scope.$broadcast('selfTurn');
-				else
-					$scope.$broadcast('playerTurn');
 			})
 		});
 		socket.on('draw card', function (card) {
@@ -255,7 +247,6 @@ app.controller('Main', function ($scope){
 			$scope.$apply(function () {
 				$scope.glog += 'Stack cut : ' + $scope.playingStack.length + '\n';
 				$scope.playingStack = [];
-				$scope.$broadcast('stackCut');
 			});
 		});
 		socket.on('select ace target', function () {
@@ -292,6 +283,15 @@ app.controller('Main', function ($scope){
 				$scope.isReady = false;
 			});
 		});
+		socket.on('chat message', function (data) {
+			$scope.$apply(function () {
+				$scope.gchat += data.player + " : " + data.message + "\n";
+			});
+		});
+	}
+	$scope.sendMessage = function (msg) {
+		$scope.socket.emit('send chat', msg);
+		return true;
 	}
 	$scope.hasCards = function(id)
   	{
@@ -455,7 +455,22 @@ app.controller('Main', function ($scope){
 		return new Array(num);   
 	}
 });
-
+app.directive('zKeypress', function(){
+  return {
+    restrict: 'A',
+    link: function(scope, elem, attr, ctrl) {
+      elem.bind('keypress', function($event){
+        scope.$apply(function(s) {
+        	console.dir(elem[0].value);
+        	if($event.keyCode == 13)
+        		if(s.sendMessage(elem[0].value))
+        			elem[0].value = "";
+          //s.$eval(attr.zKeypress);
+        });
+      });
+    }
+  };
+});
 function sortCards (c1,c2) {
 	return c1.id - c2.id;
 }

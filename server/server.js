@@ -5,10 +5,12 @@ var express = require('express')
   , io = require('socket.io').listen(server)
   , gameRules = require('./danishGameRules')
   , Player = require('./player')
-  , playerManager = require('./playerManager');
+  , playerManager = require('./playerManager')
+  ,	gameChat = require('./chat');
 
   gameRules.playerManager = playerManager;
   gameRules.io = io;
+  gameChat.io = io;
   playerManager.gameRules = gameRules;
 
 process.env.PWD = process.cwd()
@@ -23,7 +25,7 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('setPlayerName', function (data) {
 		socket.player.name = data;
-    var add = playerManager.addPlayer(socket);
+    	var add = playerManager.addPlayer(socket);
 		if(add == 'k'){
 				socket.emit('currentState', {	playingStack: gameRules.playingStack,
 												pickingStackSize: gameRules.playingDeck.length, 
@@ -64,5 +66,8 @@ io.sockets.on('connection', function (socket) {
 	});
 	socket.on('ace target', function (name) {
 		gameRules.aceTarget(name);
+	});
+	socket.on('send chat', function (msg) {
+		gameChat.rcvChat(socket, msg);
 	});
 });

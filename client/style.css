@@ -28,6 +28,10 @@ body
 	float:right;
 	margin-right: 75px;
 }
+.chat
+{
+	float: right;
+}
 .playingStack
 {
 	min-height: 96px;
