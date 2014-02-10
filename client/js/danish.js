@@ -72,7 +72,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.connectionStatus = "connected";
 				$scope.glog += 'Connected \n';
 			});
-			socket.emit('setPlayerName', playerName);
+			socket.emit('activate', playerName);
 		});
 
 		socket.on('error', function (name, value) {
@@ -92,7 +92,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
       		});
 		});
 
-		socket.on('currentState', function (data) {
+		socket.on('current state', function (data) {
 			console.log(data);
 			$scope.$apply(function () {
 				for(var i=0; i < data.players.length; i++)

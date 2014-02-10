@@ -84,6 +84,7 @@ danishGameRules.prototype.endTappingPhase = function () {
 					this.io.sockets.emit('new game state', {value: 2, name: "Player turn"});
 					this.playerManager.broadcastPlayerTurn(this.playerTurn);
 					this.playerManager.players[i].emit('force play smallest');
+					this.playerManager.players[i].forcePlaySmallest = true;
 					return;
 				}
 			};
@@ -293,7 +294,7 @@ danishGameRules.prototype.playTableCard = function (player, id) {
 }
 danishGameRules.prototype.aceTarget = function (name) {
 	for (var i = this.playerManager.players.length - 1; i >= 0; i--) {
-		if(this.playerManager.players[i].player.name == name && this.playerManager.hasCards(this.playerManager.players[i]))
+		if(this.playerManager.players[i].player.name == name && this.playerManager.players[i].hasCards())
 		{
 			this.playerTurn = i;
 			this.playerManager.broadcastPlayerTurn(this.playerTurn);
@@ -338,7 +339,7 @@ danishGameRules.prototype.endGame = function () {
 danishGameRules.prototype.renewHand = function(socket) {
 	if(this.gameState.value != 2)
 		return;
-	
+
 	this.playingDeck.splice(this.playingDeck.length, 0, socket.player.handCards);
 	socket.player.handCards.splice(0,3);
 

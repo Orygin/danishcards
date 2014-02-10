@@ -1,18 +1,42 @@
+var baseBot = require('./AI/baseAI'),
+	Player = require('./player')
+
 function playerManager(){
 	this.players= [];
 	this.gameRules = {};
 }
-playerManager.prototype.addPlayer = function (socket){
-  if(this.getPlayer(socket.player.name))
-    return 'name';
+playerManager.prototype.addPlayer = function (socket, name){
+	if(this.getPlayer(name)){
+		socket.emit('error', 'name already in use');
+		socket.disconnect();
+		return 'name';
+	}
   
-  if(this.players.length >= this.gameRules.maxPlayers)
-	  return 'max';
-  
+	if(this.players.length >= this.gameRules.maxPlayers){
+		socket.emit('error', 'too many players', gameRules.maxPlayers);
+		socket.disconnect();
+		return 'maxplayers';
+	}
+
+	socket.player = new Player(name);
+
 	this.players[this.players.length] = socket;
-  
-	return 'k';
+
+	socket.emit('current state', {	playingStack: this.gameRules.playingStack,
+									pickingStackSize: this.gameRules.playingDeck.length, 
+									gameState: this.gameRules.gameState, 
+									players: this.getPlayerList()	});
+
+	socket.broadcast.emit('user connected', name);
+
+	return 'ok';
 }
+
+playerManager.prototype.addAI = function(name) {
+	var bot = new baseBot();
+	return this.addPlayer(bot, name);
+}
+
 playerManager.prototype.getPlayer = function (name)
 {
   for (var i = this.players.length - 1; i >= 0; i--) {
@@ -104,6 +128,7 @@ playerManager.prototype.checkAllPlayerTapped = function () {
 	if(start)
 		this.gameRules.endTappingPhase();
 }
+
 playerManager.prototype.broadcastPickingDeckSize = function () {
 	this.gameRules.io.sockets.emit('picking deck size', this.gameRules.playingDeck.length);
 }
@@ -116,13 +141,11 @@ playerManager.prototype.broadcastNewStackCards = function (cards) {
 playerManager.prototype.broadcastCutStack = function () {
 	this.gameRules.io.sockets.emit('stack cut');
 }
-playerManager.prototype.hasCards = function (plr) {
-	return (plr.player.handCards.length != 0 || plr.player.tappedCards.length != 0 || plr.player.tableCards.length != 0);
-}
+
 playerManager.prototype.playerWithCardsCount = function () {
 	var count = 0;
 	for (var i = this.players.length - 1; i >= 0; i--) {
-		if(this.hasCards(this.players[i]))
+		if(this.players[i].hasCards())
 			count += 1;
 	};
 	return count;
