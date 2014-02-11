@@ -1,8 +1,15 @@
 <div class="title">Danish</div>
 <div class="connexionBox">
 	<form>
-		Enter your desired username :<br>
-		<input type="text" ng-model="playerName" value="" \><br>
-		<input type="submit" value="connect" ng-click="connect(playerName)">
+		<input type="text" ng-model="playerName" value="" autofocus\><br>
+		<input type="password" ng-model="password" value="" autofocus\><br>
+		<input 	type="submit" 
+				value="Connect" 
+				ng-click="connect(playerName, password)" 
+				ng-disabled="connectionStatus == 'connecting'">
+		<input 	type="submit" 
+				value="Create Account" 
+				ng-click="createAccount(playerName, password)" 
+				ng-disabled="connectionStatus == 'connecting'">
 	</form>
 </div>

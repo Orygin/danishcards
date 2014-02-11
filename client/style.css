@@ -40,7 +40,7 @@ body
 {
 	width: 300px;
 	padding: 5px;
-	height: 82px;
+	height: 100px;
 	margin-top: 50px;
 	margin-right: auto;
 	margin-left: auto;
@@ -52,6 +52,7 @@ body
 .connexionBox input
 {
 	text-align: center;
+	margin: 2px 0px;
 }
 .title
 {

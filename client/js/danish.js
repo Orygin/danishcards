@@ -42,6 +42,8 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			return 'tpl/disconnected.html';
 		else if($scope.connectionStatus == "connected")
 			return 'tpl/connected.html';
+		else if($scope.connectionStatus == "connecting")
+			return 'tpl/disconnected.html';
 	};
 
 	$scope.players = [];
@@ -61,20 +63,39 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.playerName = "Anonymousse";
 	$scope.chatLine = "";
 
-	$scope.connect = function (playerName) {
+	$scope.createAccount = function(playerName, password) {
 		var socket = io.connect('/');
 		$scope.socket = socket;
+		$scope.createSocketOn(socket);
 
 		$scope.playerName = playerName;
 
 		socket.on('connect', function () {
 			$scope.$apply(function () {
-				$scope.connectionStatus = "connected";
-				$scope.glog += 'Connected \n';
+				$scope.connectionStatus = "connecting";
 			});
-			socket.emit('activate', playerName);
+			socket.emit('create account', {name: playerName, pw: password});
 		});
+		socket.on('account created', function () {
+			socket.emit('activate', {name: playerName, pw: password});	
+		});
+	};
 
+	$scope.connect = function (playerName, password) {
+		var socket = io.connect('/');
+		$scope.socket = socket;
+		$scope.createSocketOn(socket);
+
+		$scope.playerName = playerName;
+
+		socket.on('connect', function () {
+			$scope.$apply(function () {
+				$scope.connectionStatus = "connecting";
+			});
+			socket.emit('activate', {name: playerName, pw: password});
+		});
+	}
+	$scope.createSocketOn = function(socket) {
 		socket.on('error', function (name, value) {
 	    	$scope.$apply(function(){
 		        if(name == 'too many players')
@@ -89,14 +110,28 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		          $scope.addAlert('name already in use', 'danger');
 		          socket.disconnect();
 		        }
+		        else if (name == 'couldn\'t log in')
+		        {
+		          $scope.connectionStatus = "disconnected";
+		          $scope.addAlert('Couldn\'t log in', 'danger');
+		          socket.disconnect();	
+		        }
+		        else if (name == 'couldn\'t create account')
+		        {
+		          $scope.connectionStatus = "disconnected";
+		          $scope.addAlert('Couldn\'t create account', 'danger');
+		          socket.disconnect();	
+		        }
       		});
 		});
 
 		socket.on('current state', function (data) {
 			console.log(data);
 			$scope.$apply(function () {
-				for(var i=0; i < data.players.length; i++)
-					$scope.players[i] = data.players[i];
+				$scope.connectionStatus = "connected";
+				$scope.glog += 'Connected \n';
+
+				$scope.players = data.players;
 				$scope.gameState = data.gameState;
 				$scope.pickingStackSize = data.pickingStackSize;
 				$scope.playingStack = data.playingStack;
@@ -308,7 +343,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.$broadcast('plsrdy');
 			});
 		});
-	}
+	};
 	$scope.sendMessage = function (msg) {
 		$scope.socket.emit('send chat', msg);
 		return true;
