@@ -160,7 +160,7 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 		if(cards[0].id == 10 || cutByFour){
 			this.playingStack = [];
 			this.playerManager.broadcastCutStack();
-			if(!this.playerManager.hasCards(this.playerManager.players[this.playerTurn]))
+			if(!this.playerManager.players[this.playerTurn].hasCards())
 				this.nextPlayerTurn();
 		}
 		else
@@ -249,7 +249,7 @@ danishGameRules.prototype.nextPlayerTurn = function () {
 	if(this.playerTurn >= this.playerManager.players.length)
 		this.playerTurn = 0;
 
-	if(this.playerManager.playerWithCardsCount() > 1 && !this.playerManager.hasCards(this.playerManager.players[this.playerTurn]))
+	if(this.playerManager.playerWithCardsCount() > 1 && !this.playerManager.players[this.playerTurn].hasCards())
 		return this.nextPlayerTurn(); // don't broadcast it if we skip a player
 
 	this.playerManager.broadcastPlayerTurn(this.playerTurn);
