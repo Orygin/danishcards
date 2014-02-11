@@ -47,6 +47,9 @@ playerManager.prototype.getPlayer = function (name)
   return false;
 }
 playerManager.prototype.removePlayer = function (socket){
+	if(socket.player === undefined)
+		return false;
+
 	for (var i = this.players.length - 1; i >= 0; i--) {
 		if(this.players[i].player.name == socket.player.name){
 			this.players.splice(i,1);
@@ -177,7 +180,7 @@ playerManager.prototype.broadcastCutStack = function () {
 playerManager.prototype.playerWithCardsCount = function () {
 	var count = 0;
 	for (var i = this.players.length - 1; i >= 0; i--) {
-		if(this.players[i].hasCards())
+		if(this.players[i].player.hasCards())
 			count += 1;
 	};
 	return count;
