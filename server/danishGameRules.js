@@ -84,7 +84,7 @@ danishGameRules.prototype.endTappingPhase = function () {
 					this.io.sockets.emit('new game state', {value: 2, name: "Player turn"});
 					this.playerManager.broadcastPlayerTurn(this.playerTurn);
 					this.playerManager.players[i].emit('force play smallest');
-					this.playerManager.players[i].forcePlaySmallest = true;
+					this.playerManager.players[i].player.forcePlaySmallest = true;
 					return;
 				}
 			};
@@ -96,8 +96,11 @@ danishGameRules.prototype.cardsEqual = function (card1, card2) {
 	return (card1.id == card2.id && card1.family == card2.family);
 }
 danishGameRules.prototype.playCards = function (socket, cards) {
-	if(this.canPlayCard(cards[0]) && this.playerManager.players[this.playerTurn].player.name == socket.player.name) //it's our turn and we can play this card
+	if(this.canPlayCard(cards[0], socket) && this.playerManager.players[this.playerTurn].player.name == socket.player.name) //it's our turn and we can play this card
 	{
+		if(socket.player.forcePlaySmallest)
+				socket.player.forcePlaySmallest = false;
+
 		for (var i = cards.length - 1; i >= 0; i--) {
 			this.playingStack[this.playingStack.length] = cards[i];
 		};
@@ -179,8 +182,9 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 		this.checkEndGame();
 		return true;
 	}
-	else if(!this.canPlayCard(cards[0]) && socket.player.handCards.length == 0 && socket.player.tappedCards.length > 0 && this.playerManager.players[this.playerTurn].player.name == socket.player.name)
+	else if(!this.canPlayCard(cards[0], socket) && socket.player.handCards.length == 0 && socket.player.tappedCards.length > 0 && this.playerManager.players[this.playerTurn].player.name == socket.player.name)
 	{
+		// it's our turn and we tried to play a tapped but we can't, so play anyway but make the player take the stack
 		for (var i = cards.length - 1; i >= 0; i--) { // Add bad cards to the stack
 			this.playingStack[this.playingStack.length] = cards[i];
 		};
@@ -212,7 +216,7 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 	}
 	return false;
 }
-danishGameRules.prototype.canPlayCard = function (card) {
+danishGameRules.prototype.canPlayCard = function (card, socket) {
 	if(this.playingStack.length <= 0)
 			return true;
 		
@@ -220,6 +224,9 @@ danishGameRules.prototype.canPlayCard = function (card) {
 
 	if(card.id == 2 || card.id == 3)
 		return true;
+
+	if(socket.player.forcePlaySmallest && card != socket.player.getSmallestCard())
+		return false;
 
 	if(latest.id == 3)
 	{ // resolve which card we're playing on

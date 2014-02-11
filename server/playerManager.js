@@ -1,4 +1,4 @@
-var baseBot = require('./AI/baseAI'),
+var baseBot = require('./AI/oryginAI'),
 	Player = require('./player')
 
 function playerManager(){

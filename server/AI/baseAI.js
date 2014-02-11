@@ -1,14 +1,21 @@
-var basePlayer = require('../player');
-var playerHelper = require('./playerHelper');
-var chat = require('../chat');
+var basePlayer = require('../player'),
+	playerHelper = require('./playerHelper'),
+	chat = require('../chat'),
+	makeSocket = require('../makeSocket'),
+	fakeSocket = require('./fakeSocket');
 
 module.exports = function AI () {
+	this.gameRules = require('../danishGameRules');
+	this.playerManager = require('../playerManager');
+
 	this.playerHelper = new playerHelper(this);
 	this.player = {};
 	this.io = {};
-
+	
 	this.socketCallbacks = [];
 	this.emitBroadcast = false;
+
+	this.socket = new fakeSocket(this);
 
 // The client has to handle these functions accordingly,
 // While we use the values from the server directly
@@ -51,6 +58,7 @@ module.exports = function AI () {
 
 	this.on('current state', function (state) { // called when the player object was created upon us
 		this.player.isAI = true;
+		makeSocket.call(this.socket);
 	});
 }
 

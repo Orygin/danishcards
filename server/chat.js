@@ -8,7 +8,7 @@ function gameChat() {
 
 	this.gameRules = gameRules;
 
-	this.rcon = 'DeSaucisson';
+	this.rcon = 'sauce';
 	this.sv_cheats = false;
 
 	this.on = function(name, desc, flags, fct) {
