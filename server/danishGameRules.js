@@ -328,7 +328,7 @@ danishGameRules.prototype.endGame = function () {
 		this.playerManager.players[i].player.tableCards = [];
 		this.playerManager.players[i].player.handCards = [];
 		this.playerManager.players[i].player.tappedCards = [];
-    this.playerManager.players[i].player.ready = false;
+    	this.playerManager.players[i].player.ready = false;
 	};
 
 	this.io.sockets.emit('gameEnd');

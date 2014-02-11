@@ -317,7 +317,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 					$scope.players[i].tappedHand = [];
 					$scope.players[i].playingHand = 0;
 					$scope.players[i].tableHand = 0;
-					$scope.players[i].false;
+					$scope.players[i].isReady = false;
 				};
 				$scope.playingStack = [];
 				$scope.playingHand = [];
