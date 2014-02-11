@@ -410,7 +410,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		};
 		return false;
 	}
-	Mousetrap.bind('space', function() { $scope.$apply($scope.playSelected); });
+	Mousetrap.bind('space', function() { $scope.$apply($scope.playSelected); return false; });
 	$scope.playSelected = function () {
 		if($scope.playerTurn == $scope.playerName && $scope.selectedCards.length >= 1 && $scope.canPlayCard($scope.selectedCards[0]) )
 		{
