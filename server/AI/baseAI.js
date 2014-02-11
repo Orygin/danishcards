@@ -10,6 +10,9 @@ module.exports = function AI () {
 	this.socketCallbacks = [];
 	this.emitBroadcast = false;
 
+// The client has to handle these functions accordingly,
+// While we use the values from the server directly
+// So these are events but the data is already changed
 	this.on('new playing hand', function (cards) {
 	});
 
@@ -23,10 +26,6 @@ module.exports = function AI () {
 	});
 
 	this.on('player turn', function (playerName) {
-		if(playerName = this.name)
-			this.selfTurn();
-		else
-			this.otherTurn();
 	});
 
 	this.on('cards played', function (cards) {
@@ -81,12 +80,3 @@ module.exports.prototype.emit = function(name, data) {
 
 	this.socketCallbacks[name].call(this, data);
 };
-
-module.exports.prototype.selfTurn = function() {
-	chat.rcvMessage(this, 'It\'s my turn yay');
-};
-module.exports.prototype.otherTurn = function() {
-	
-};
-
-// The client has to handle these functions, the changes are already made for IA, treat it as events

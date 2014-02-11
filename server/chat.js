@@ -130,7 +130,7 @@ gameChat.prototype.parseCommand = function(socket, msg) {
 		{
 			var acm = require('./accountManager');
 
-			if(acm.isPlayerAdmin(socket.player.name))
+			if(!acm.isPlayerAdmin(socket.player.name))
 				return {isCommand:true, message: "You don't have admin rights"};
 		}
 		else if(flag == 'cheat')
