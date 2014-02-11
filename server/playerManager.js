@@ -34,6 +34,7 @@ playerManager.prototype.addPlayer = function (socket, name){
 
 playerManager.prototype.addAI = function(name) {
 	var bot = new baseBot();
+	bot.io = this.gameRules.io;
 	return this.addPlayer(bot, name);
 }
 
@@ -47,12 +48,26 @@ playerManager.prototype.getPlayer = function (name)
 }
 playerManager.prototype.removePlayer = function (socket){
 	for (var i = this.players.length - 1; i >= 0; i--) {
-		if(this.players[i].player.name == socket.player.name)
+		if(this.players[i].player.name == socket.player.name){
 			this.players.splice(i,1);
+			socket.broadcast.emit('user disconnected', socket.player.name);
+			this.gameRules.checkEndGame();
+			return true;
+		}
 	};
+	return false;
 }
+playerManager.prototype.removeAI = function(name) {
+	var plr = this.getPlayer(name);
+	
+	if(!plr)
+		return false;
+
+	return this.removePlayer(plr);
+};
 playerManager.prototype.setPlayerReady = function (socket){
 	socket.player.ready = true;
+	this.gameRules.io.sockets.emit('player ready', socket.player.name);
 	if(this.players.length > 1)
 	{
 		var start = true;
@@ -64,15 +79,32 @@ playerManager.prototype.setPlayerReady = function (socket){
 			this.gameRules.startGame();
 	}
 }
+playerManager.prototype.setPlayerUnready = function (socket){
+	socket.player.ready = false;
+	this.gameRules.io.sockets.emit('player unready', socket.player.name);
+}
+playerManager.prototype.setAIReady = function(name) {
+	var plr = this.getPlayer(name);
+	if(!plr)
+		return false;
+
+	this.setPlayerReady(plr);
+	return true;
+}
+playerManager.prototype.setAIUnready = function(name) {
+	var plr = this.getPlayer(name);
+	if(!plr)
+		return false;
+
+	this.setPlayerUnready(plr);
+	return true;
+};
 playerManager.prototype.endGame = function () {
 	for (var i = this.players.length - 1; i >= 0; i--) {
 			this.players[i].player.ready = false;
 
 			this.players[i].broadcast.emit('player unready', this.players[i].player.name);
 		};
-}
-playerManager.prototype.setPlayerUnready = function (socket){
-	socket.player.ready = false;
 }
 playerManager.prototype.getPlayers = function () {
 	var ret = [];
@@ -150,4 +182,4 @@ playerManager.prototype.playerWithCardsCount = function () {
 	};
 	return count;
 }
-module.exports = new playerManager();
+module.exports = exports = new playerManager();

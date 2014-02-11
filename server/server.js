@@ -6,7 +6,8 @@ var express = require('express')
   , gameRules = require('./danishGameRules')
   , Player = require('./player')
   , playerManager = require('./playerManager')
-  ,	gameChat = require('./chat');
+  ,	gameChat = require('./chat')
+  , accountManager = require('./accountManager');
 
   gameRules.playerManager = playerManager;
   gameRules.io = io;
@@ -24,21 +25,26 @@ server.listen(Number(process.env.PORT || 1337));
 
 io.sockets.on('connection', function (socket) {
 
-	socket.on('activate', function (name) {
-		playerManager.addPlayer(socket,name);
-	})
+	socket.on('activate', function (data) {
+		if(accountManager.connect(data.name, data.pw))
+			playerManager.addPlayer(socket, data.name);
+		else
+			socket.emit('error', 'couldn\'t log in');
+	});
+	socket.on('create account', function(data) {
+		if(accountManager.addAccount(data.name, data.pw))
+			socket.emit('account created');
+		else
+			socket.emit('error', 'couldn\'t create account');
+	});
 	socket.on('disconnect', function () {
 		playerManager.removePlayer(socket);
-		socket.broadcast.emit('user disconnected', socket.player.name);
-		gameRules.checkEndGame();
 	});
 	socket.on('setReady', function () {
 		playerManager.setPlayerReady(socket);
-		io.sockets.emit('player ready', socket.player.name);
 	});
 	socket.on('setUnready', function () {
 		playerManager.setPlayerUnready(socket);
-		io.sockets.emit('player unready', socket.player.name);
 	});
 	socket.on('set tapped card', function (card) {
 		if(playerManager.tappedCard(socket, card))

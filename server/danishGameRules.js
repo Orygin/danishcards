@@ -305,7 +305,7 @@ danishGameRules.prototype.aceTarget = function (name) {
 danishGameRules.prototype.checkEndGame = function () {
 	var playerWithCards = 0;
 	for (var i = this.playerManager.players.length - 1; i >= 0; i--) {
-		if(this.playerManager.hasCards(this.playerManager.players[i]))
+		if(this.playerManager.players[i].player.hasCards())
 		{
 			playerWithCards += 1;
 		}

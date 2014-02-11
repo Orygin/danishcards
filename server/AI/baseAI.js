@@ -3,11 +3,12 @@ var playerHelper = require('./playerHelper');
 var chat = require('../chat');
 
 module.exports = function AI () {
-	this.playerHelper = playerHelper;
+	this.playerHelper = new playerHelper(this);
 	this.player = {};
 	this.io = {};
 
 	this.socketCallbacks = [];
+	this.emitBroadcast = false;
 
 	this.on('new playing hand', function (cards) {
 	});
@@ -55,15 +56,26 @@ module.exports = function AI () {
 }
 
 module.exports.prototype.__defineGetter__('broadcast', function () { // We are to send info to everyone and other AIs
-	
-	
-	return this; // Won't be used
+	this.emitBroadcast = true;
+	return this;
 });
 
 module.exports.prototype.on = function(name, fct) {
 	this.socketCallbacks[name] = fct;
 };
 module.exports.prototype.emit = function(name, data) {
+	if(this.emitBroadcast == true)
+	{
+		this.emitBroadcast = false;
+		this.io.sockets.emit(name, data); // Send to real players with socket.io
+		this.playerHelper.forEachAI(function (Ai) {
+			if(Ai.player.name != this.player.name)
+				Ai.emit(name, data); // Emit for each Ai that is not us
+		});
+
+		return;
+	}
+
 	if(this.socketCallbacks[name] === undefined)
 		return;
 
