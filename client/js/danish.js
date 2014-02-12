@@ -70,31 +70,13 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.password = "";
 	$scope.chatLine = "";
 
-	$scope.createAccount = function(playerName, password) {
-		var socket = io.connect('/');
-		$scope.socket = socket;
-		$scope.createSocketOn(socket);
-
-		$scope.playerName = playerName;
-		$scope.password = password;
-
-		socket.on('connect', function () {
-			$scope.$apply(function () {
-				$scope.connectionStatus = "connecting";
-			});
-			socket.emit('create account', {name: playerName, pw: password});
-		});
-		socket.on('account created', function () {
-			socket.emit('activate', {name: playerName, pw: password});	
-		});
-	};
-
 	$scope.connect = function (playerName, password) {
 		var socket = io.connect('/');
 		$scope.socket = socket;
 		$scope.createSocketOn(socket);
 
 		$scope.playerName = playerName;
+		$scope.password = password;
 
 		socket.on('connect', function () {
 			$scope.$apply(function () {
