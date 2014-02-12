@@ -1,5 +1,6 @@
 function globals() {
 	this.sv_cheats = false;
+	this.rcon = 'sauce';
 
 	this.sv_maxPlayers = 5;
 

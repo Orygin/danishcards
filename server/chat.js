@@ -1,5 +1,6 @@
-var gameRules = require('./danishGameRules');
-var playerManager = require('./playerManager');
+var gameRules = require('./danishGameRules'),
+	playerManager = require('./playerManager'),
+	_g = require('./globals');
 
 function gameChat() {
 	this.io = {};
@@ -7,9 +8,6 @@ function gameChat() {
 	this.commandCb = [];
 
 	this.gameRules = gameRules;
-
-	this.rcon = 'sauce';
-	this.sv_cheats = false;
 
 	this.on = function(name, desc, flags, fct) {
 		this.commandCb[name] = fct;
@@ -33,7 +31,7 @@ function gameChat() {
 		if(arg.length < 2)
 			return {isCommand:true, message: 'password missing'};
 
-		if(arg[1] == this.rcon)
+		if(arg[1] == _g.rcon)
 		{
 			var acm = require('./accountManager');
 			acm.getAccount(arg[0].player.name).rank = 'admin';
@@ -55,9 +53,9 @@ function gameChat() {
 	});
 	this.on('/sv_cheats', 'Enable or disable cheats', ['admin', 'replicated'], function(arg) {
 		if(arg.length < 2)
-			return {isCommand:true, message: "sv_cheats : " + this.sv_cheats};
+			return {isCommand:true, message: "sv_cheats : " + _g.sv_cheats};
 
-		this.sv_cheats = arg[1] ? 1 : 0;
+		_g.sv_cheats = arg[1] ? 1 : 0;
 
 		return {isCommand:true, message: "Sv_cheats changed to : " + arg[1]};
 	});
@@ -135,7 +133,7 @@ gameChat.prototype.parseCommand = function(socket, msg) {
 		}
 		else if(flag == 'cheat')
 		{
-			if(this.sv_cheats != 1)
+			if(_g.sv_cheats != 1)
 				return {isCommand:true, message: "Cant exec command with sv_cheats off"};
 		}
 		else if (flag == 'replicated')
