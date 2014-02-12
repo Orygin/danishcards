@@ -67,6 +67,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.shouldTarget = false;
 	$scope.shouldPlaySmall = false;
 	$scope.playerName = "Anonymousse";
+	$scope.password = "";
 	$scope.chatLine = "";
 
 	$scope.createAccount = function(playerName, password) {
@@ -75,6 +76,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		$scope.createSocketOn(socket);
 
 		$scope.playerName = playerName;
+		$scope.password = password;
 
 		socket.on('connect', function () {
 			$scope.$apply(function () {
