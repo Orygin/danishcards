@@ -29,7 +29,9 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	});
 })
 
-.controller('Main', function ($scope){
+.controller('Main', function ($scope, $location){
+	$scope.title = $location.host();
+
 	$scope.alerts = [];
 	$scope.addAlert = function(mesg, level) {
 		$scope.alerts.push({msg: mesg, type: level});
