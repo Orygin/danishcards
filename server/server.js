@@ -23,6 +23,7 @@ process.env.PWD = process.cwd()
 
 app.use(express.static(process.env.PWD+'/client/'));
 //app.use(express.logger());
+io.set('log level', 1);
 
 server.listen(Number(process.env.PORT || 1337));
 

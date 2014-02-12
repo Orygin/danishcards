@@ -1,3 +1,5 @@
+// Manages players and AIs
+
 var baseBot = require('./AI/oryginAI'),
 	Player = require('./player'),
 	_g = require('./globals');
@@ -24,7 +26,7 @@ playerManager.prototype.addPlayer = function (socket, name){
 	this.players[this.players.length] = socket;
 
 	socket.broadcast.emit('user connected', name);
-	
+
 	socket.emit('current state', {	playingStack: this.gameRules.playingStack,
 									pickingStackSize: this.gameRules.playingDeck.length, 
 									gameState: _g.gameState, 

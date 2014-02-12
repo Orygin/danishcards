@@ -1,6 +1,8 @@
+//This serves as a layer to socket.io. This allows us to send things to AI too as they are not true sockets and are unknown to socket.io
+
 var playerManager = require('./playerManager');
 
-function io () {	
+function io () {
 }
 function sockets() {
 	this.sIo = {};
@@ -8,7 +10,7 @@ function sockets() {
 
 sockets.prototype.emit = function(name, data, ignore) {
 	this.sIo.sockets.emit(name, data);
-	
+
 	playerManager.forEachAI(function (ai) {
 		if(ignore === undefined)
 			ai.emit(name, data);
