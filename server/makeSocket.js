@@ -1,3 +1,5 @@
+//This was exported to its own module so it can be called on the fakeSocket of AIs as well as player's socket
+
 module.exports = function() {
 	var playerManager = require('./playerManager'),
 		gameRules = require('./danishGameRules'),
@@ -7,14 +9,13 @@ module.exports = function() {
 	this.on('activate', function (data) {
 		if(accountManager.connect(data.name, data.pw))
 			playerManager.addPlayer(this, data.name);
-		else
-			this.emit('error', 'couldn\'t log in');
-	});
-	this.on('create account', function(data) {
-		if(accountManager.addAccount(data.name, data.pw))
-			this.emit('account created');
-		else
-			this.emit('error', 'couldn\'t create account');
+		else 
+		{
+			if(accountManager.addAccount(data.name, data.pw))
+				playerManager.addPlayer(this, data.name);
+			else
+				this.emit('error', 'couldn\'t create account');
+		}
 	});
 	this.on('disconnect', function () {
 		playerManager.removePlayer(this);
