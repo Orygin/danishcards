@@ -1,19 +1,11 @@
-var staticCards = require('./cards');
-function danishGameRules(){
-	this.GAMESTATES = {
-		NOTPLAYING : {value: 0, name: "Not Playing"},
-		TAPPINGPHASE: {value: 1, name: "Tapping phase"},
-		PLAYERTURN: {value:2, name: "Player turn"},
-		AITURN: {value:3, name: "AI turn"}
-	};
+var staticCards = require('./cards'),
+	_g = require('./globals');
 
-	this.maxPlayers = 5;
-	this.gameState = this.GAMESTATES.NOTPLAYING;
+function danishGameRules(){
 	this.playerTurn = -1;
 	this.playingStack = [];
 	this.playingDeck = this.shuffleCards(staticCards.cards());
 	this.playerManager = {};
-	this.networking = {};
 	this.io = {};
 }
 danishGameRules.prototype.setPlayerManager = function (manager) {
@@ -40,7 +32,7 @@ danishGameRules.prototype.shuffleCards = function(deck){ // function taken from 
   return deck;
 }
 danishGameRules.prototype.startGame = function () {
-	if(this.gameState.value != 0)
+	if(_g.gameState.value != 0)
 		return;
 
 	var j = 0;
@@ -67,10 +59,10 @@ danishGameRules.prototype.startGame = function () {
 	};
 	this.playerManager.broadcastPlayersHand();
 	this.playerManager.broadcastPickingDeckSize();
-	this.setGameState(this.GAMESTATES.TAPPINGPHASE);
+	this.setGameState(_g.GAMESTATES.TAPPINGPHASE);
 };
 danishGameRules.prototype.setGameState = function (state) {
-	this.gameState = state;
+	_g.gameState = state;
 	this.io.sockets.emit('new game state', state);
 }
 danishGameRules.prototype.endTappingPhase = function () {
@@ -321,7 +313,7 @@ danishGameRules.prototype.checkEndGame = function () {
 	this.endGame();
 }
 danishGameRules.prototype.endGame = function () {
-	if(this.gameState.value == 0)
+	if(_g.gameState.value == 0)
 		return;
 
 	for (var i = this.playerManager.players.length - 1; i >= 0; i--) {
@@ -334,17 +326,17 @@ danishGameRules.prototype.endGame = function () {
 	this.io.sockets.emit('gameEnd');
 	this.io.sockets.emit('currentState', {	playingStack: this.playingStack,
 												pickingStackSize: this.playingDeck.length, 
-												gameState: this.gameState, 
+												gameState: _g.gameState, 
 												players: this.playerManager.getPlayerList()	});
 
 	this.playingStack = [];
 
 	this.playingDeck = this.shuffleCards(staticCards.cards());
   
-	this.setGameState(this.GAMESTATES.NOTPLAYING);
+	this.setGameState(_g.GAMESTATES.NOTPLAYING);
 }
 danishGameRules.prototype.renewHand = function(socket) {
-	if(this.gameState.value != 2)
+	if(_g.gameState.value != 2)
 		return;
 
 	this.playingDeck.splice(this.playingDeck.length, 0, socket.player.handCards);

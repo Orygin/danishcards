@@ -1,4 +1,5 @@
-var baseAI = require('./baseAI');
+var baseAI 	= require('./baseAI'),
+	_g		= require('../globals');
 
 oryginAI.prototype = baseAI.prototype;
 oryginAI.prototype.constructor = oryginAI;
@@ -6,9 +7,17 @@ oryginAI.prototype.constructor = oryginAI;
 function oryginAI() {
 	baseAI.call(this);
 
+	this.onCreate = function (state) {
+		console.dir(state.gameState);
+		if(state.gameState == _g.GAMESTATES.NOTPLAYING)
+			this.socket.emit('set ready');
+	}
 	// The client has to handle these functions accordingly,
 	// While we use the values from the server directly
 	// So these are events but the data is already changed
+	this.on('new game state', function(state) {
+
+	});
 	this.on('new playing hand', function (cards) {
 	});
 
@@ -19,6 +28,7 @@ function oryginAI() {
 	});
 
 	this.on('picking deck size', function (size) {
+		console.log('AI ' + this.player.name + " rcved picking size : " + size);
 	});
 
 	this.on('player turn', function (playerName) {

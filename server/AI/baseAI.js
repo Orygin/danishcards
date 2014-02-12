@@ -17,6 +17,8 @@ module.exports = function AI () {
 
 	this.socket = new fakeSocket(this);
 
+	this.onCreate = function (state) {};
+
 // The client has to handle these functions accordingly,
 // While we use the values from the server directly
 // So these are events but the data is already changed
@@ -59,6 +61,7 @@ module.exports = function AI () {
 	this.on('current state', function (state) { // called when the player object was created upon us
 		this.player.isAI = true;
 		makeSocket.call(this.socket);
+		this.onCreate(state);
 	});
 }
 
@@ -74,12 +77,7 @@ module.exports.prototype.emit = function(name, data) {
 	if(this.emitBroadcast == true)
 	{
 		this.emitBroadcast = false;
-		this.io.sockets.emit(name, data); // Send to real players with socket.io
-		this.playerHelper.forEachAI(function (Ai) {
-			if(Ai.player.name != this.player.name)
-				Ai.emit(name, data); // Emit for each Ai that is not us
-		});
-
+		this.io.sockets.emit(name, data, this); // Send to all via our global sockets (will call AIs)
 		return;
 	}
 

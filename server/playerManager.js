@@ -1,5 +1,6 @@
 var baseBot = require('./AI/oryginAI'),
-	Player = require('./player')
+	Player = require('./player'),
+	_g = require('./globals');
 
 function playerManager(){
 	this.players= [];
@@ -12,8 +13,8 @@ playerManager.prototype.addPlayer = function (socket, name){
 		return 'name';
 	}
   
-	if(this.players.length >= this.gameRules.maxPlayers){
-		socket.emit('error', 'too many players', gameRules.maxPlayers);
+	if(this.players.length >= _g.maxPlayers){
+		socket.emit('error', 'too many players', _g.maxPlayers);
 		socket.disconnect();
 		return 'maxplayers';
 	}
@@ -22,12 +23,12 @@ playerManager.prototype.addPlayer = function (socket, name){
 
 	this.players[this.players.length] = socket;
 
+	socket.broadcast.emit('user connected', name);
+	
 	socket.emit('current state', {	playingStack: this.gameRules.playingStack,
 									pickingStackSize: this.gameRules.playingDeck.length, 
-									gameState: this.gameRules.gameState, 
+									gameState: _g.gameState, 
 									players: this.getPlayerList()	});
-
-	socket.broadcast.emit('user connected', name);
 
 	return 'ok';
 }
@@ -35,6 +36,7 @@ playerManager.prototype.addPlayer = function (socket, name){
 playerManager.prototype.addAI = function(name) {
 	var bot = new baseBot();
 	bot.io = this.gameRules.io;
+	bot.isAi = true;
 	return this.addPlayer(bot, name);
 }
 
@@ -176,7 +178,23 @@ playerManager.prototype.broadcastNewStackCards = function (cards) {
 playerManager.prototype.broadcastCutStack = function () {
 	this.gameRules.io.sockets.emit('stack cut');
 }
-
+playerManager.prototype.forEachAI = function(fct) {
+	for (var i = this.players.length - 1; i >= 0; i--) {
+		if(this.players[i].player.isAI)
+			fct(this.players[i]);
+	};
+};
+playerManager.prototype.forEachNonAI = function(fct) {
+	for (var i = this.players.length - 1; i >= 0; i--) {
+		if(!this.players[i].player.isAI)
+			fct(this.players[i]);
+	};
+};
+playerManager.prototype.forEachPlayer = function(fct) {
+	for (var i = this.players.length - 1; i >= 0; i--) {
+		fct(this.players[i]);
+	};
+};
 playerManager.prototype.playerWithCardsCount = function () {
 	var count = 0;
 	for (var i = this.players.length - 1; i >= 0; i--) {

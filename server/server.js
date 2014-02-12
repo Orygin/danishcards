@@ -8,11 +8,13 @@ var express = require('express')
   , playerManager = require('./playerManager')
   ,	gameChat = require('./chat')
   , accountManager = require('./accountManager')
-  , makeSocket = require('./makeSocket');
+  , makeSocket = require('./makeSocket')
+  , globalIO = require('./globalIO');
 
+  globalIO.sockets.sIo = io;
   gameRules.playerManager = playerManager;
-  gameRules.io = io;
-  gameChat.io = io;
+  gameRules.io = globalIO;
+  gameChat.io = globalIO;
   gameChat.gameRules = gameRules;
   gameChat.playerManager = playerManager;
   playerManager.gameRules = gameRules;
@@ -20,7 +22,7 @@ var express = require('express')
 process.env.PWD = process.cwd()
 
 app.use(express.static(process.env.PWD+'/client/'));
-app.use(express.logger());
+//app.use(express.logger());
 
 server.listen(Number(process.env.PORT || 1337));
 

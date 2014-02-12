@@ -14,7 +14,14 @@ playerHelper.prototype.forEachPlayer = function(fct) {
 playerHelper.prototype.forEachAI = function(fct) {
 	var players = this.getPlayerList();
 	for (var i = players.length - 1; i >= 0; i--) {
-		if(players[i].isAI)
+		if(players[i].player.isAI)
+			fct.call(this.Ai, players[i]);
+	};
+};
+playerHelper.prototype.forEachNonAI = function(fct) {
+	var players = this.getPlayerList();
+	for (var i = players.length - 1; i >= 0; i--) {
+		if(!players[i].player.isAI)
 			fct.call(this.Ai, players[i]);
 	};
 };

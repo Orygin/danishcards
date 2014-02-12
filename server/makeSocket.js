@@ -19,10 +19,10 @@ module.exports = function() {
 	this.on('disconnect', function () {
 		playerManager.removePlayer(this);
 	});
-	this.on('setReady', function () {
+	this.on('set ready', function () {
 		playerManager.setPlayerReady(this);
 	});
-	this.on('setUnready', function () {
+	this.on('set unready', function () {
 		playerManager.setPlayerUnready(this);
 	});
 	this.on('set tapped card', function (card) {
