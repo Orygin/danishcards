@@ -135,6 +135,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.gameState = data.gameState;
 				$scope.pickingStackSize = data.pickingStackSize;
 				$scope.playingStack = data.playingStack;
+				$scope.isReady = false;
+				$scope.playingHand = [];
+				$scope.tappedHand = [];
+				$scope.tableHand = 0;
 			})
 		});
 		socket.on('new game state', function (state) {
@@ -142,7 +146,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.gameState = state;
 				if(state.value = 1 && state.name == "Tapping phase") // tapping phase
 				{
-          $scope.playingStack = [];
+          			$scope.playingStack = [];
 					for (var i = $scope.players.length - 1; i >= 0; i--) {
 						$scope.players[i].tableHand = 3;
 					};
@@ -498,11 +502,11 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	}
 	$scope.toggleReady = function () {
 		if($scope.isReady){
-			$scope.socket.emit('setUnready');
+			$scope.socket.emit('set unready');
 			$scope.isReady = false;
 		}
 		else{
-			$scope.socket.emit('setReady');
+			$scope.socket.emit('set ready');
 			$scope.isReady = true;
 		}
 	};
@@ -516,7 +520,6 @@ app.directive('zKeypress', function(){
     link: function(scope, elem, attr, ctrl) {
       elem.bind('keypress', function($event){
         scope.$apply(function(s) {
-        	console.dir(elem[0].value);
         	if($event.keyCode == 13)
         		if(s.sendMessage(elem[0].value))
         			elem[0].value = "";
