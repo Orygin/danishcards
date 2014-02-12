@@ -86,3 +86,6 @@ module.exports.prototype.emit = function(name, data) {
 
 	this.socketCallbacks[name].call(this, data);
 };
+module.exports.prototype.disconnect = function() {
+	
+};

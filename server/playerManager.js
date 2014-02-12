@@ -2,6 +2,8 @@
 
 var baseBot = require('./AI/oryginAI'),
 	Player = require('./player'),
+	accountManager = require('./accountManager'),
+	gameChat = require('./chat'),
 	_g = require('./globals');
 
 function playerManager(){
@@ -9,16 +11,16 @@ function playerManager(){
 	this.gameRules = {};
 }
 playerManager.prototype.addPlayer = function (socket, name){
-	if(this.getPlayer(name)){
-		socket.emit('error', 'name already in use');
-		socket.disconnect();
-		return 'name';
-	}
-  
 	if(this.players.length >= _g.maxPlayers){
 		socket.emit('error', 'too many players', _g.maxPlayers);
 		socket.disconnect();
 		return 'maxplayers';
+	}
+
+	if(this.getPlayer(name)){
+		this.getPlayer(name).disconnect();
+		this.removePlayer(this.getPlayer(name));
+		this.addPlayer(socket, name);
 	}
 
 	socket.player = new Player(name);
@@ -30,12 +32,17 @@ playerManager.prototype.addPlayer = function (socket, name){
 	socket.emit('current state', {	playingStack: this.gameRules.playingStack,
 									pickingStackSize: this.gameRules.playingDeck.length, 
 									gameState: _g.gameState, 
-									players: this.getPlayerList()	});
+									players: this.getPlayerList(),
+									availableCommands: gameChat.getCommandList()	});
 
 	return 'ok';
 }
 
 playerManager.prototype.addAI = function(name) {
+	if(accountManager.getAccount(name)){
+		return 'name';
+	}// bots may not take an already existing account name (which would prevent a player from connecting)
+
 	var bot = new baseBot();
 	bot.io = this.gameRules.io;
 	bot.isAi = true;

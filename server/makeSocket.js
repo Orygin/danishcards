@@ -10,12 +10,10 @@ module.exports = function() {
 		if(accountManager.connect(data.name, data.pw))
 			playerManager.addPlayer(this, data.name);
 		else 
-		{
 			if(accountManager.addAccount(data.name, data.pw))
 				playerManager.addPlayer(this, data.name);
 			else
-				this.emit('error', 'couldn\'t create account');
-		}
+				this.emit('error', 'Username already taken : wrong password');
 	});
 	this.on('disconnect', function () {
 		playerManager.removePlayer(this);
