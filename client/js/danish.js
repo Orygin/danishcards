@@ -27,6 +27,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		if(!$scope.muted)
 			$scope.plsRdy.play();
 	});
+	$scope.$on('mention', function() {
+		if(!$scope.muted)
+			$scope.mentionSound.play();
+	});
 })
 
 .controller('Main', function ($scope, $location){
@@ -69,6 +73,14 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.playerName = "Anonymousse";
 	$scope.password = "";
 	$scope.chatLine = "";
+	$scope.availableCommands = [];
+
+	$scope.autoCompletePos = 0;
+	$scope.autoCompleteValue = "";
+
+	$scope.chatHistory = [];
+	$scope.chatHistoryPos = -1;
+	$scope.chatHistoryValue = "";
 
 	$scope.connect = function (playerName, password) {
 		var socket = io.connect('/');
@@ -106,10 +118,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		          $scope.addAlert('Couldn\'t log in', 'danger');
 		          socket.disconnect();	
 		        }
-		        else if (name == 'couldn\'t create account')
+		        else if (name == 'Username already taken : wrong password')
 		        {
 		          $scope.connectionStatus = "disconnected";
-		          $scope.addAlert('Couldn\'t create account', 'danger');
+		          $scope.addAlert('Username already taken : wrong password', 'danger');
 		          socket.disconnect();	
 		        }
       		});
@@ -125,6 +137,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.gameState = data.gameState;
 				$scope.pickingStackSize = data.pickingStackSize;
 				$scope.playingStack = data.playingStack;
+				$scope.availableCommands = data.availableCommands;
 				$scope.isReady = false;
 				$scope.playingHand = [];
 				$scope.tappedHand = [];
@@ -325,6 +338,11 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		socket.on('chat message', function (data) {
 			$scope.$apply(function () {
 				$scope.gchat += data.player + " : " + data.message + "\n";
+				var words = data.message.split(' ');
+				for (var i = words.length - 1; i >= 0; i--) {
+					if(words[i] == $scope.playerName)
+						$scope.$broadcast('mention');
+				};
 			});
 		});
 		socket.on('chat command', function (data) {
@@ -338,10 +356,117 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			});
 		});
 	};
+	$scope.nextAutoComplete = function(msg) {
+		var words = msg.split(" ");
+
+		if($scope.autoCompletePos == -1)
+			$scope.autoCompleteValue = words[words.length-1];
+
+		$scope.autoCompletePos += 1;
+
+		var work = $scope.autoCompleteValue;
+		var values = [];
+
+		if(work[0] == "/") // auto complete command
+			values = $scope.getCommandStartingWith(work);
+		else
+			values = $scope.getPlayerStartingWith(work);
+
+		if(values.length == 0){ //Nothing to do here, reset ourselves
+			$scope.autoCompletePos = -1;
+			return msg;
+		}
+		if($scope.autoCompletePos >= values.length)
+			$scope.autoCompletePos = 0;
+
+		work = values[$scope.autoCompletePos];
+		words[words.length-1] = work;
+		return words.join(' ');
+	};
+	$scope.getCommandStartingWith = function(starting) {
+		var res = [];
+
+		var commandsCpy = JSON.parse(JSON.stringify($scope.availableCommands));
+		commandsCpy.sort(function(a,b) { return a.name > b.name });
+		commandsCpy.reverse();
+
+		for (var i = commandsCpy.length - 1; i >= 0; i--) {
+			var cmd = commandsCpy[i];
+
+			var add = true;
+			for (var j = starting.length - 1; j >= 0; j--) {
+				if(starting[j] != cmd.name[j])
+					add = false;
+			};
+			if(add)
+				res[res.length] = cmd.name;
+		};
+		return res;
+	};
+	$scope.getPlayerStartingWith = function(starting) {
+		var res = [];
+
+		var playersCpy = JSON.parse(JSON.stringify($scope.players));
+		playersCpy.sort(function(a,b) { return a.name > b.name });
+		playersCpy.reverse();
+
+
+		for (var i = playersCpy.length - 1; i >= 0; i--) {
+			var plr = playersCpy[i];
+			var add = true;
+			for (var j = starting.length - 1; j >= 0; j--) {
+				if(starting[j] != plr.name[j])
+					add = false;
+			};
+			if(add)
+				res[res.length] = plr.name;
+		};
+		return res;
+	};
+	$scope.removeAutoComplete = function(msg) {
+		if($scope.autoCompletePos == -1)
+			return false;
+
+		$scope.autoCompletePos = -1;
+
+		var words = msg.split(" ");
+		words[words.length-1] = $scope.autoCompleteValue; //Restore the original line
+
+		return words.join(' ');
+	};
+	$scope.stopAutoComplete = function() {
+		$scope.autoCompletePos = -1;
+	};
 	$scope.sendMessage = function (msg) {
+		$scope.autoCompletePos = -1;
 		$scope.socket.emit('send chat', msg);
+
+		$scope.chatHistoryPos = $scope.chatHistory.length;
+		$scope.chatHistory[$scope.chatHistory.length] = msg;
+
 		return true;
 	}
+	$scope.moveUpHistory = function(msg) {
+		if($scope.chatHistoryPos >= $scope.chatHistory.length-1)
+			$scope.chatHistoryValue = msg;
+
+		var res = $scope.chatHistory[$scope.chatHistoryPos];
+
+		$scope.chatHistoryPos = Math.max($scope.chatHistoryPos - 1, 0); //Move up the history but no further than 0
+
+		return res;
+	};
+	$scope.moveDownHistory = function(msg) {
+		if($scope.chatHistoryPos >= $scope.chatHistory.length-1)
+			if($scope.chatHistoryValue == '')
+				return msg;
+			else
+				return $scope.chatHistoryValue;
+		
+		$scope.chatHistoryPos += 1;
+
+		return $scope.chatHistory[$scope.chatHistoryPos];
+	};
 	$scope.hasCards = function(id)
   	{
     	return ($scope.players[id].playingHand != 0 || $scope.players[id].tappedHand.length != 0 || $scope.players[id].tableHand != 0);
@@ -510,10 +635,29 @@ app.directive('zKeypress', function(){
     link: function(scope, elem, attr, ctrl) {
       elem.bind('keypress', function($event){
         scope.$apply(function(s) {
-        	if($event.keyCode == 13)
+        	if($event.which == 13){
         		if(s.sendMessage(elem[0].value))
         			elem[0].value = "";
-          //s.$eval(attr.zKeypress);
+        	}
+        	else if($event.keyCode == 9){ //tab
+        		elem[0].value = s.nextAutoComplete(elem[0].value);
+        		$event.preventDefault();
+        	}
+        	else if($event.which == 8) {// backspace
+        		var res = s.removeAutoComplete(elem[0].value);
+        		if(res){
+        			elem[0].value = res;
+        			$event.preventDefault();
+        		}
+        	}
+        	else if($event.keyCode == 38){ // Up
+        		s.stopAutoComplete();
+        		elem[0].value = s.moveUpHistory(elem[0].value);
+        	}
+        	else if($event.keyCode == 40) // down
+        		elem[0].value = s.moveDownHistory(elem[0].value);
+        	else
+        		s.stopAutoComplete();
         });
       });
     }

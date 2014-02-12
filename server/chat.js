@@ -20,8 +20,6 @@ function gameChat() {
 
 		for(var i in this.commandCb)
 		{
-			var acm = require('./accountManager');
-
 			response += i + " : " + this.commandCb[i].desc + "\n";
 		}
 
@@ -144,6 +142,15 @@ gameChat.prototype.parseCommand = function(socket, msg) {
 	res.isReplicated = replic;
 
 	return res;
+};
+
+gameChat.prototype.getCommandList = function() {
+	var response = [];
+	for(var i in this.commandCb)
+	{
+		response[response.length] = {name: i, desc: this.commandCb[i].desc, flags: this.commandCb[i].flags};
+	}
+	return response;
 };
 
 module.exports = new gameChat();
