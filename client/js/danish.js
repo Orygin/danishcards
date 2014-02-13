@@ -610,7 +610,15 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			return true;
 		else
 			return false;
-	}
+	};
+	$scope.canTakeStack = function() {
+		if($scope.playerTurn == $scope.playerName) // and
+		if($scope.playingStack.length != 0) //and
+		if($scope.playingHand.length != 0)
+			return true
+
+		return false;
+	};
 	$scope.aceTarget = function (plr) {
 		if($scope.shouldTarget)
 		{
@@ -633,7 +641,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	};
 	$scope.getNumber = function(num) {
 		return new Array(num);   
-	}
+	};
 });
 app.directive('zKeypress', function(){
   return {

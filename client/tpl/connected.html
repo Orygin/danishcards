@@ -23,7 +23,7 @@
 	Your table cards :
 	<img ng-repeat="i in getNumber(tableHand) track by $index" src="img/cards/b1fv.png" ng-click="tableCardClick($index)"/>
 
-	<a href="#" ng-click="takeStack()">Take stack</a> - <a href="#" ng-click="playSelected()">Play card(s)</a>
+	<a href="#" ng-click="takeStack()" ng-show="canTakeStack()">Take stack</a> - <a href="#" ng-click="playSelected()">Play card(s)</a>
 
 	<div ng-include="'tpl/soundTpl.html'"></div>
 </div>
