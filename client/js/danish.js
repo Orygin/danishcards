@@ -63,7 +63,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.playingHand = [];
 	$scope.tappedHand = [];
 	$scope.tableHand = 0;
-	$scope.isReady = false;
+	$scope.ready = false;
 	$scope.playingStack = [];
 	$scope.glog = "";
 	$scope.gchat = "";
@@ -138,7 +138,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.pickingStackSize = data.pickingStackSize;
 				$scope.playingStack = data.playingStack;
 				$scope.availableCommands = data.availableCommands;
-				$scope.isReady = false;
+				$scope.ready = false;
 				$scope.playingHand = [];
 				$scope.tappedHand = [];
 				$scope.tableHand = 0;
@@ -154,6 +154,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 						$scope.players[i].tableHand = 3;
 					};
 				}
+
 				$scope.glog += 'New game state ' + state.name +'\n';
 			});
 		});
@@ -324,7 +325,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 					$scope.players[i].tappedHand = [];
 					$scope.players[i].playingHand = 0;
 					$scope.players[i].tableHand = 0;
-					$scope.players[i].isReady = false;
+					$scope.players[i].ready = false;
 				};
 				$scope.playingStack = [];
 				$scope.playingHand = [];
@@ -332,7 +333,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.tableHand = 0;
 				$scope.playerTurn = "";
 				$scope.shouldTarget = false;
-				$scope.isReady = false;
+				$scope.ready = false;
 			});
 		});
 		socket.on('chat message', function (data) {
@@ -621,13 +622,13 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			$scope.socket.emit('gibe stack');
 	}
 	$scope.toggleReady = function () {
-		if($scope.isReady){
+		if($scope.ready){
 			$scope.socket.emit('set unready');
-			$scope.isReady = false;
+			$scope.ready = false;
 		}
 		else{
 			$scope.socket.emit('set ready');
-			$scope.isReady = true;
+			$scope.ready = true;
 		}
 	};
 	$scope.getNumber = function(num) {

@@ -64,7 +64,12 @@ playerManager.prototype.removePlayer = function (socket){
 	for (var i = this.players.length - 1; i >= 0; i--) {
 		if(this.players[i].player.name == socket.player.name){
 			this.players.splice(i,1);
+
 			socket.broadcast.emit('user disconnected', socket.player.name);
+
+			if(this.emptyHand(socket))
+				this.broadcastPickingDeckSize();
+
 			this.gameRules.checkEndGame();
 			return true;
 		}
@@ -78,6 +83,25 @@ playerManager.prototype.removeAI = function(name) {
 		return false;
 
 	return this.removePlayer(plr);
+};
+playerManager.prototype.emptyHand = function(socket) {
+	var b = this.gameRules.playingDeck.length;
+	for (var i = socket.player.handCards.length - 1; i >= 0; i--) {
+		if(this.gameRules.playingDeck.length > 0)
+			this.gameRules.playingDeck.splice(0,0, socket.player.handCards[i]);
+	};
+	for (var i = socket.player.tappedCards.length - 1; i >= 0; i--) {
+		if(this.gameRules.playingDeck.length > 0)
+			this.gameRules.playingDeck.splice(0,0, socket.player.tappedCards[i]);
+	};
+	for (var i = socket.player.tableCards.length - 1; i >= 0; i--) {
+		if(this.gameRules.playingDeck.length > 0)
+			this.gameRules.playingDeck.splice(0,0, socket.player.tableCards[i]);
+	};
+
+	this.gameRules.shuffleCards(this.gameRules.playingDeck);
+
+	return this.gameRules.playingDeck.length > b; // Did we add cards to the stack
 };
 playerManager.prototype.setPlayerReady = function (socket){
 	socket.player.ready = true;
