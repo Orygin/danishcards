@@ -441,31 +441,36 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		$scope.autoCompletePos = -1;
 		$scope.socket.emit('send chat', msg);
 
-		$scope.chatHistoryPos = $scope.chatHistory.length;
 		$scope.chatHistory[$scope.chatHistory.length] = msg;
+		$scope.chatHistoryPos = $scope.chatHistory.length;
 
 		return true;
 	}
 	$scope.moveUpHistory = function(msg) {
-		if($scope.chatHistoryPos >= $scope.chatHistory.length-1)
+		if($scope.chatHistoryPos >= $scope.chatHistory.length)
 			$scope.chatHistoryValue = msg;
 
-		var res = $scope.chatHistory[$scope.chatHistoryPos];
-
 		$scope.chatHistoryPos = Math.max($scope.chatHistoryPos - 1, 0); //Move up the history but no further than 0
+
+		var res = $scope.chatHistory[$scope.chatHistoryPos];
 
 		return res;
 	};
 	$scope.moveDownHistory = function(msg) {
-		if($scope.chatHistoryPos >= $scope.chatHistory.length-1)
+		$scope.chatHistoryPos += 1;
+
+		if($scope.chatHistoryPos >= $scope.chatHistory.length){
+			$scope.chatHistoryPos  = $scope.chatHistory.length;
 			if($scope.chatHistoryValue == '')
 				return msg;
 			else
 				return $scope.chatHistoryValue;
+		}
 		
-		$scope.chatHistoryPos += 1;
-
 		return $scope.chatHistory[$scope.chatHistoryPos];
+	};
+	$scope.stopHistory = function() {
+		$scope.chatHistoryPos = $scope.chatHistory.length;		
 	};
 	$scope.hasCards = function(id)
   	{
@@ -644,6 +649,7 @@ app.directive('zKeypress', function(){
         		$event.preventDefault();
         	}
         	else if($event.which == 8) {// backspace
+        		s.stopHistory();
         		var res = s.removeAutoComplete(elem[0].value);
         		if(res){
         			elem[0].value = res;
@@ -654,8 +660,10 @@ app.directive('zKeypress', function(){
         		s.stopAutoComplete();
         		elem[0].value = s.moveUpHistory(elem[0].value);
         	}
-        	else if($event.keyCode == 40) // down
+        	else if($event.keyCode == 40){ // down
+        		s.stopAutoComplete();
         		elem[0].value = s.moveDownHistory(elem[0].value);
+        	}
         	else
         		s.stopAutoComplete();
         });
