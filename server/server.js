@@ -8,13 +8,24 @@ var express = require('express')
   , playerManager = require('./playerManager')
   ,	gameChat = require('./chat')
   , accountManager = require('./accountManager')
-  , makeSocket = require('./makeSocket')
-  , globalIO = require('./globalIO');
+  , makeSocket = require('./makeSocket');
 
-  globalIO.sockets.sIo = io;
+// hijack sockets.emit to account for AIs
+io.sockets.oemit = io.sockets.emit;
+io.sockets.emit = function (name, data, ignore) {
+	this.oemit(name, data); // original emit
+
+	playerManager.forEachAI(function (ai) {
+		if(ignore === undefined)
+			ai.emit(name, data);
+		else if(ignore.player.name != ai.player.name)
+			ai.emit(name, data);
+	});
+};
+
   gameRules.playerManager = playerManager;
-  gameRules.io = globalIO;
-  gameChat.io = globalIO;
+  gameRules.io = io;
+  gameChat.io = io;
   gameChat.gameRules = gameRules;
   gameChat.playerManager = playerManager;
   playerManager.gameRules = gameRules;

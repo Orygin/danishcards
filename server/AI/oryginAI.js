@@ -8,7 +8,6 @@ function oryginAI() {
 	baseAI.call(this);
 
 	this.onCreate = function (state) {
-		console.dir(state.gameState);
 		if(state.gameState == _g.GAMESTATES.NOTPLAYING)
 			this.socket.emit('set ready');
 	}

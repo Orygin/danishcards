@@ -20,7 +20,7 @@ playerManager.prototype.addPlayer = function (socket, name){
 	if(this.getPlayer(name)){
 		this.getPlayer(name).disconnect();
 		this.removePlayer(this.getPlayer(name));
-		this.addPlayer(socket, name);
+		return this.addPlayer(socket, name);
 	}
 
 	socket.player = new Player(name);
