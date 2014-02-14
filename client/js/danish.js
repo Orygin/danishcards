@@ -33,7 +33,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	});
 })
 
-.controller('Main', function ($scope, $location){
+.controller('Main', function ($scope, $location, $window){
 	$scope.title = "Danish";
 	if($location.host() == "congo.ledessert.eu")
 		$scope.title = "Congo";
@@ -327,7 +327,6 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 					$scope.players[i].tableHand = 0;
 					$scope.players[i].ready = false;
 				};
-				$scope.playingStack = [];
 				$scope.playingHand = [];
 				$scope.tappedHand = [];
 				$scope.tableHand = 0;
@@ -517,6 +516,13 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		else
 			$scope.toggleCardSelection(card, id);
 	}
+	$scope.doubleClickHand = function (card, id) {
+		$scope.selectedCards = [];
+		for (var i = $scope.playingHand.length - 1; i >= 0; i--) {
+			if($scope.playingHand[i].id == card.id)
+				$scope.selectedCards[$scope.selectedCards.length] =	$scope.playingHand[i];
+		};
+	}
 	$scope.toggleCardSelection = function (card, id) {
 		var rm = false;
 		for (var i = $scope.selectedCards.length - 1; i >= 0; i--) {
@@ -656,6 +662,19 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		if($scope.playerTurn == $scope.playerName)
 			$scope.socket.emit('gibe stack');
 	}
+	$scope.makeStylePlayingHand = function (index) {
+		var shift = 0;
+
+		for(var i = 1; i <= index; i++)
+		{
+			if($scope.playingHand[i].id == $scope.playingHand[i-1].id)
+				shift += 18;
+			else
+				shift += 78;
+		}
+
+		return {position: 'absolute', left: shift + 'px'};
+	}
 	$scope.toggleReady = function () {
 		if($scope.ready){
 			$scope.socket.emit('set unready');
@@ -708,6 +727,37 @@ app.directive('zKeypress', function(){
         });
       });
     }
+  };
+});
+app.directive('playerCard', function($window){
+  return {
+    restrict: 'E',
+    scope: {
+        sizeList: '=size',
+        activate: '=activate',
+    },
+    link: function(scope, elem, attr, ctrl) {
+    	elem[0].style.position = 'relative';
+    	resize();
+
+		angular.element($window).bind('resize',function(){
+    		scope.$apply(resize);
+		});
+
+    	function resize() {
+    		var parentSize = elem[0].parentElement.clientWidth - 10;
+    		var size = parentSize / 71;
+
+    		if(size <= scope.sizeList && scope.activate)
+    		{
+    			size = ((-parentSize+71)/(scope.sizeList)) + 71;
+    			size = Math.max(size, 0);
+
+    			elem[0].style.right = size + 'px';
+    			elem[0].style.marginRight = -size + 'px';
+			}
+    	}
+  	}
   };
 });
 function sortCards (c1,c2) {

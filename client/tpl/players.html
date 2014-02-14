@@ -1,6 +1,11 @@
 <div ng-repeat="obs in players" class="playerBox" ng-hide="obs.name == playerName">
-		{{obs.name}}
-		Playing Hand : <img ng-repeat="i in getNumber(obs.playingHand) track by $index" src="img/cards/b2fv.png"><br>
-		Tapped cards : <img ng-repeat="card in obs.tappedHand track by $index" ng-src="img/cards/{{card.img}}.png" /><br>
-		Table cards : <img ng-repeat="i in getNumber(obs.tableHand) track by $index" src="img/cards/b1fv.png"><br>
+		{{obs.name}}<br>
+		<player-card 	size="obs.playingHand" 
+						activate="!$first" 
+						ng-repeat="i in getNumber(obs.playingHand) track by $index"
+						style="max-width:70px;">
+			<img src="img/cards/b2fv.png" />
+		</player-card><br>
+		<img ng-repeat="card in obs.tappedHand track by $index" ng-src="img/cards/{{card.img}}.png" /><br>
+		<img ng-repeat="i in getNumber(obs.tableHand) track by $index" src="img/cards/b1fv.png"><br>
 </div>

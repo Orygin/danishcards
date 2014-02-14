@@ -9,6 +9,12 @@ body
 	position: relative;
 	bottom:15px;
 }
+.repeatingCard
+{
+	position: relative;
+	right: 60px;
+	margin-right: -60px;
+}
 .playerBox
 {
 	border: 1px solid black;

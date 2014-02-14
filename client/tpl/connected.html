@@ -18,9 +18,17 @@
 	<div class="playingStack"><img ng-repeat="card in playingStack track by $index" ng-src="img/cards/{{card.img}}.png"/></div><br>
 
 	Your hand :
-	<img ng-repeat="card in playingHand track by $index" ng-src="img/cards/{{card.img}}.png" ng-click="handCardClick(card, $index)" ng-class="{selected: isCardSelected(card)}" /><br>
+	<img	ng-repeat="card in playingHand track by $index" 
+				ng-src="img/cards/{{card.img}}.png"
+				ng-click="handCardClick(card, $index)"
+				ng-dblclick="doubleClickHand(card, $index)"
+				ng-class="{selected: isCardSelected(card), repeatingCard: card.id == playingHand[$index-1].id}" />
+	<br>
 	Your tapped cards :
-	<img ng-repeat="card in tappedHand track by $index" ng-src="img/cards/{{card.img}}.png" ng-click="tappedCardClick(card, $index)" ng-class="{selected: isCardSelected(card)}" /><br>
+	<img	ng-repeat="card in tappedHand track by $index"
+			ng-src="img/cards/{{card.img}}.png"
+			ng-click="tappedCardClick(card, $index)"
+			ng-class="{selected: isCardSelected(card)}" /><br>
 	Your table cards :
 	<img ng-repeat="i in getNumber(tableHand) track by $index" src="img/cards/b1fv.png" ng-click="tableCardClick($index)"/>
 
