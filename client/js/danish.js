@@ -384,6 +384,33 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		words[words.length-1] = work;
 		return words.join(' ');
 	};
+	$scope.previousAutoComplete = function(msg) {
+		var words = msg.split(" ");
+
+		if($scope.autoCompletePos == -1)
+			$scope.autoCompleteValue = words[words.length-1];
+
+		$scope.autoCompletePos -= 1;
+
+		var work = $scope.autoCompleteValue;
+		var values = [];
+
+		if(work[0] == "/") // auto complete command
+			values = $scope.getCommandStartingWith(work);
+		else
+			values = $scope.getPlayerStartingWith(work);
+
+		if(values.length == 0){ //Nothing to do here, reset ourselves
+			$scope.autoCompletePos = -1;
+			return msg;
+		}
+		if($scope.autoCompletePos < 0 || $scope.autoCompletePos >= values.length)
+			$scope.autoCompletePos = 0;
+		
+		work = values[$scope.autoCompletePos];
+		words[words.length-1] = work;
+		return words.join(' ');
+	};
 	$scope.getCommandStartingWith = function(starting) {
 		var res = [];
 
@@ -647,14 +674,18 @@ app.directive('zKeypress', function(){
   return {
     restrict: 'A',
     link: function(scope, elem, attr, ctrl) {
-      elem.bind('keypress', function($event){
+      elem.bind('keydown', function($event){
         scope.$apply(function(s) {
+        	console.dir($event);
         	if($event.which == 13){
         		if(s.sendMessage(elem[0].value))
         			elem[0].value = "";
         	}
         	else if($event.keyCode == 9){ //tab
-        		elem[0].value = s.nextAutoComplete(elem[0].value);
+        		if($event.shiftKey)
+        			elem[0].value = s.previousAutoComplete(elem[0].value);
+        		else
+        			elem[0].value = s.nextAutoComplete(elem[0].value);
         		$event.preventDefault();
         	}
         	else if($event.which == 8) {// backspace
