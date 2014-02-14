@@ -676,7 +676,6 @@ app.directive('zKeypress', function(){
     link: function(scope, elem, attr, ctrl) {
       elem.bind('keydown', function($event){
         scope.$apply(function(s) {
-        	console.dir($event);
         	if($event.which == 13){
         		if(s.sendMessage(elem[0].value))
         			elem[0].value = "";
