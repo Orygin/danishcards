@@ -22,7 +22,8 @@ io.sockets.emit = function (name, data, ignore) {
 			ai.emit(name, data);
 	});
 };
-
+  
+  accountManager.readFromFile();
   gameRules.playerManager = playerManager;
   gameRules.io = io;
   gameChat.io = io;
@@ -40,4 +41,8 @@ server.listen(Number(process.env.PORT || 1337));
 
 io.sockets.on('connection', function (socket) {
 	makeSocket.call(socket);
+});
+
+process.on('exit', function () {
+  accountManager.saveToFile(true);
 });

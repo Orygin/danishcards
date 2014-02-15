@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 function simpleAccountManager () {
 	this.accounts = [];
 }
@@ -17,7 +19,7 @@ function account(name, pw, rank) {
 	};
 }
 
-simpleAccountManager.prototype.addAccount = function(name,pw) {
+simpleAccountManager.prototype.addAccount = function(name, pw) {
 	if(this.getAccount(name))
 		return false;
 
@@ -55,5 +57,33 @@ simpleAccountManager.prototype.kickPlayer = function(name, timeSec) {
 simpleAccountManager.prototype.isPlayerAdmin = function(name) {
 	return this.getAccount(name).rank == 'admin';
 };
+simpleAccountManager.prototype.saveToFile = function(sync) {
+	if(!sync)
+		fs.writeFile('accounts.json', JSON.stringify(this.accounts), function (err) {
+			if(err)
+				console.log('Error saving to file');
+			else
+				console.log('Accounts saved');
+		});
+	else
+		fs.writeFileSync('accounts.json', JSON.stringify(this.accounts));
+};
+simpleAccountManager.prototype.readFromFile = function() {
+	this.accounts = [];
+	var acc = this.accounts;
+	fs.readFile('accounts.json', function (err, data) {
+		data = data.toString();
+		data = JSON.parse(data);
+		
+		if(data === undefined)
+			return;
 
+		for(o in data){
+			acc[acc.length] = new account(data[o].name, data[o].password, data[o].rank);
+			acc[acc.length-1].kickedTime = data[o].kickedTime;
+			acc[acc.length-1].stats = data[o].stats;
+		}
+		console.log('Read accounts from file');
+	});
+};
 module.exports = new simpleAccountManager();

@@ -94,6 +94,11 @@ function gameChat() {
 		else
 			return {isCommand:true, message: "Could not remove AI"};
 	});
+	this.on('/saveAccounts', 'Saves all accounts to file', ['admin'], function () {
+		var acc = require('./accountManager');
+		acc.saveToFile();
+		return {isCommand:true, message: "Accounts saved"};
+	});
 }
 
 gameChat.prototype.rcvChat = function(socket, msg) {
