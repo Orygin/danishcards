@@ -63,6 +63,17 @@ voteSystem.prototype.castVote = function(args) {
 		if(!this.checkVote())
 			_g.gameChat.serverSay(args[0].player.name + ' voted');
 	}
+	else if (args.length == 1)
+	{
+		var res = "No vote in progress";
+		if(this.currentVote.name !== ""){
+			var out = "";
+			for(var i = 1; i <= this.currentVote.args.length-1; i++)
+				out += this.currentVote.args[i] + " ";
+			res = "Vote in progress : " + out + " : " + this.currentVote.voters;
+		}
+		args[0].emit('chat command', {message: res});
+	}
 	else
 		args[0].emit('chat command', {message:'failed to start a vote : vote already in progress'});
 };
