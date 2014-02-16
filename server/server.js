@@ -8,7 +8,8 @@ var express = require('express')
   , playerManager = require('./playerManager')
   ,	gameChat = require('./chat')
   , accountManager = require('./accountManager')
-  , makeSocket = require('./makeSocket');
+  , makeSocket = require('./makeSocket')
+  , voteSystem = require('./voteSystem');
 
 // hijack sockets.emit to account for AIs
 io.sockets.oemit = io.sockets.emit;

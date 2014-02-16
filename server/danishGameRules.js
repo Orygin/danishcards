@@ -7,6 +7,11 @@ function danishGameRules(){
 	this.playingDeck = this.shuffleCards(staticCards.cards());
 	this.playerManager = {};
 	this.io = {};
+	_g.gameRules = this;
+
+	_g.on('player disconnect', function (socket) {
+		_g.gameRules.checkEndGame();
+	});
 }
 danishGameRules.prototype.setPlayerManager = function (manager) {
 	this.playerManager = manager;

@@ -1,7 +1,10 @@
-var fs = require('fs');
+var fs = require('fs'),
+	_g = require('./globals');
 
 function simpleAccountManager () {
 	this.accounts = [];
+
+	_g.accountManager = this;
 }
 function account(name, pw, rank) {
 	this.name = name;
@@ -12,7 +15,7 @@ function account(name, pw, rank) {
 	this.stats = {};
 
 	this.kick = function(timeSec) {
-		this.kickedTime = new Date((new Date()).getTime() + time * 1000);
+		this.kickedTime = new Date((new Date()).getTime() + timeSec * 1000);
 	};
 	this.isKicked = function() {
 		return this.kickedTime > (new Date());
@@ -47,6 +50,9 @@ simpleAccountManager.prototype.connect = function(name, pw) {
 		return false;
 };
 simpleAccountManager.prototype.kickPlayer = function(name, timeSec) {
+	// We try to remove the player anyway because AIs
+	_g.playerManager.kickPlayer(name);
+
 	var acc = this.getAccount(name);
 
 	if(!acc)

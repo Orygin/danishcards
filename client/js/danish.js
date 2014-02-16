@@ -118,15 +118,18 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		          $scope.addAlert('Couldn\'t log in', 'danger');
 		          socket.disconnect();	
 		        }
-		        else if (name == 'Username already taken : wrong password')
+		        else if (name == 'failed login')
 		        {
 		          $scope.connectionStatus = "disconnected";
-		          $scope.addAlert('Username already taken : wrong password', 'danger');
+		          $scope.addAlert('Username already taken / wrong password / kicked', 'danger');
 		          socket.disconnect();	
 		        }
       		});
 		});
-
+		socket.on('disconnect', function () {
+			$scope.connectionStatus = "disconnected";
+			$scope.addAlert('You have been disconnected', 'danger');
+		});
 		socket.on('current state', function (data) {
 			console.log(data);
 			$scope.$apply(function () {

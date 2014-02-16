@@ -4,7 +4,8 @@ module.exports = function() {
 	var playerManager = require('./playerManager'),
 		gameRules = require('./danishGameRules'),
 		gameChat = require('./chat'),
-		accountManager = require('./accountManager');
+		accountManager = require('./accountManager'),
+		_g = require('./globals');
 
 	this.on('activate', function (data) {
 		if(accountManager.connect(data.name, data.pw))
@@ -13,7 +14,7 @@ module.exports = function() {
 			if(accountManager.addAccount(data.name, data.pw))
 				playerManager.addPlayer(this, data.name);
 			else
-				this.emit('error', 'Username already taken : wrong password');
+				this.emit('error', 'failed login');
 	});
 	this.on('disconnect', function () {
 		playerManager.removePlayer(this);

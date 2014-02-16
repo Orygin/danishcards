@@ -9,13 +9,18 @@ function gameChat() {
 
 	this.gameRules = gameRules;
 
+	_g.gameChat = this;
+
 	this.on = function(name, desc, flags, fct) {
 		this.commandCb[name] = fct;
 		this.commandCb[name].desc = desc;
 		this.commandCb[name].flags = flags;
 	};
 
-	this.on('/help', 'display this', [], function () {
+	this.on('/help', 'display this', [], function (arg) {
+		if(arg.length > 1 && arg[1] == "vote")
+			return {isCommand:true, message: _g.voteSystem.listVotes()};
+
 		var response = "Available commands are : \n";
 
 		for(var i in this.commandCb)
@@ -99,6 +104,10 @@ function gameChat() {
 		acc.saveToFile();
 		return {isCommand:true, message: "Accounts saved"};
 	});
+	this.on('/vote', 'Allow players to vote or create votes', [], function (args) {
+		_g.voteSystem.castVote(args);
+		return {isCommand:true, message: ""};
+	});
 }
 
 gameChat.prototype.rcvChat = function(socket, msg) {
@@ -157,5 +166,7 @@ gameChat.prototype.getCommandList = function() {
 	}
 	return response;
 };
-
+gameChat.prototype.serverSay = function(msg) {
+	this.io.sockets.emit('chat command', {message: msg});
+};
 module.exports = new gameChat();

@@ -9,6 +9,8 @@ var baseBot = require('./AI/oryginAI'),
 function playerManager(){
 	this.players= [];
 	this.gameRules = {};
+
+	_g.playerManager = this;
 }
 playerManager.prototype.addPlayer = function (socket, name){
 	if(this.players.length >= _g.maxPlayers){
@@ -66,16 +68,21 @@ playerManager.prototype.removePlayer = function (socket){
 			this.players.splice(i,1);
 
 			socket.broadcast.emit('user disconnected', socket.player.name);
+			_g.emit('player disconnect', socket);
 
 			if(this.emptyHand(socket))
 				this.broadcastPickingDeckSize();
 
-			this.gameRules.checkEndGame();
 			return true;
 		}
 	};
 	return false;
 }
+playerManager.prototype.kickPlayer = function(name) {
+	var plr = this.getPlayer(name);
+	plr.disconnect();
+	this.removePlayer(plr);
+};
 playerManager.prototype.removeAI = function(name) {
 	var plr = this.getPlayer(name);
 	

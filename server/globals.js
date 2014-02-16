@@ -10,7 +10,32 @@ function globals() {
 		PLAYERTURN: {value:2, name: "Player turn"},
 		AITURN: {value:3, name: "AI turn"}
 	};
+
 	this.gameState = this.GAMESTATES.NOTPLAYING;
+
+	this.gameRules = {};
+	this.playerManager = {};
+	this.accountManager = {};
+	this.voteSystem = {};
+
+	this.events = [];
+};
+
+globals.prototype.on = function(name, fct) {
+	if(this.events[name]=== undefined)
+		this.events[name] = [];
+
+	this.events[name][this.events[name].length] = fct;
+};
+globals.prototype.emit = function(name, data) {
+	var ev = this.events[name];
+	
+	if(ev === undefined)
+		return;
+
+	for (var i = ev.length - 1; i >= 0; i--) {
+		ev[i](data);
+	};
 };
 
 module.exports = new globals();
