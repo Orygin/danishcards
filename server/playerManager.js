@@ -67,11 +67,11 @@ playerManager.prototype.removePlayer = function (socket){
 		if(this.players[i].player.name == socket.player.name){
 			this.players.splice(i,1);
 
-			socket.broadcast.emit('user disconnected', socket.player.name);
-			_g.emit('player disconnect', socket);
-
 			if(this.emptyHand(socket))
 				this.broadcastPickingDeckSize();
+
+			socket.broadcast.emit('user disconnected', socket.player.name);
+			_g.emit('player disconnect', socket);
 
 			return true;
 		}
