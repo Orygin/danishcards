@@ -42,7 +42,7 @@ body
 {
 	min-height: 96px;
 }
-.connexionBox
+.connexionBox, .ghLog
 {
 	width: 300px;
 	padding: 5px;
@@ -59,6 +59,17 @@ body
 {
 	text-align: center;
 	margin: 2px 0px;
+}
+.ghLog
+{
+	height: 200px;
+	width: 500px;
+}
+.ghLog textarea
+{
+	margin-top: 4px;
+	width: 488px;
+	height: 150px;
 }
 .title
 {

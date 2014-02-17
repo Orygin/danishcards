@@ -766,3 +766,27 @@ app.directive('playerCard', function($window){
 function sortCards (c1,c2) {
 	return c1.id - c2.id;
 }
+app.controller('githubLog', function ($scope){
+	var script = document.createElement('script');
+	script.src = 'https://api.github.com/repos/orygin/danishcards/commits?callback=ghcb';
+
+	document.getElementsByTagName('head')[0].appendChild(script);
+
+	$scope.ghlog = "";
+	$scope.parseData = function(data) {
+		for (var i = data.length - 1; i >= 0; i--) {
+			$scope.ghlog += "\n" + data[i].commit.committer.name + " - " + data[i].commit.committer.date;
+			var lines = data[i].commit.message.match(/[^\r\n]+/g);
+			for (var j = lines.length - 1; j >= 0; j--) {
+				$scope.ghlog += "\n - " + lines[j]; //Each line gets an added dash
+			}
+		};
+	};
+});
+function ghcb(response) {
+  var data = response.data;
+  scope = angular.element(document.getElementsByClassName('ghLog')[0]).scope();
+  scope.$apply(function() {
+  	scope.parseData(data);
+  });
+}

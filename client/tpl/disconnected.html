@@ -9,3 +9,7 @@
 				ng-disabled="connectionStatus == 'connecting'">
 	</form>
 </div>
+<div ng-controller="githubLog" class="ghLog">
+	Latest changes : <br>
+	<textarea scroll-glue disabled="disabled">{{ghlog}}</textarea>
+</div>
