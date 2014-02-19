@@ -38,7 +38,7 @@ app.use(express.static(process.env.PWD+'/client/'));
 //app.use(express.logger());
 io.set('log level', 1);
 
-server.listen(Number(process.env.PORT || 1337));
+server.listen(Number(process.env.PORT || 80));
 
 io.sockets.on('connection', function (socket) {
 	makeSocket.call(socket);
