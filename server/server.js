@@ -57,8 +57,8 @@ process.on('exit', function (code) {
   }
 });
 
-app.get('/restart', function(req, res){
+app.post('/restart', function(req, res){
   res.send(200);
-  
+
   process.exit(1337);
 });
