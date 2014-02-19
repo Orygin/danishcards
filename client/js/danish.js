@@ -777,7 +777,7 @@ app.controller('githubLog', function ($scope){
 		for (var i = data.length - 1; i >= 0; i--) {
 			$scope.ghlog += "\n" + data[i].commit.committer.name + " - " + data[i].commit.committer.date;
 			var lines = data[i].commit.message.match(/[^\r\n]+/g);
-			for (var j = lines.length - 1; j >= 0; j--) {
+			for (var j = 0; j <= lines.length - 1; j++) {
 				$scope.ghlog += "\n - " + lines[j]; //Each line gets an added dash
 			}
 		};
