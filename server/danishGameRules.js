@@ -270,11 +270,15 @@ danishGameRules.prototype.drawCard = function (player) {
 			if(card2.id == 2 || card2.id == 3 || card2.id == 10){
 				card = card2;
 				i = this.playingDeck.length-j;
+				console.log('Considering card : ' card2.id);
 			}
 			else if(card2.id > card.id){
 				card = card2;
 				i = this.playingDeck.length-j;
+				console.log('Considering card : ' card2.id);
 			}
+			else
+				console.log('Skipped card : ' card2.id);
 
 			j -= 1;
 		}
