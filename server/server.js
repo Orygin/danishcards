@@ -53,6 +53,6 @@ process.on('exit', function (code) {
   }
 });
 
-app.get('/restart', function(req, res){
+app.post('/restart', function(req, res){
   process.exit(1337);
 });
