@@ -46,13 +46,17 @@ io.sockets.on('connection', function (socket) {
 
 process.on('exit', function (code) {
   accountManager.saveToFile(true);
-  console.log('exiting');
+
   if(code == 1337){
-    var exec = require('child_process').exec;
-    exec('./restartserver.sh', {cwd: process.env.PWD});  
+    var exec = require('child_process').spawn,
+        fs = require('fs'),
+        out = fs.openSync('./out.log', 'a'),
+        err = fs.openSync('./out.log', 'a');
+    var ch = exec('./restartserver.sh', [], {cwd: process.env.PWD, detached: true, stdio: [ 'ignore', out, err ]});
+    ch.unref();
   }
 });
 
-app.post('/restart', function(req, res){
+app.get('/restart', function(req, res){
   process.exit(1337);
 });
