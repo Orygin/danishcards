@@ -267,18 +267,17 @@ danishGameRules.prototype.drawCard = function (player) {
 		{
 			var card2 = this.playingDeck[this.playingDeck.length-j];
 
+			if(card2 === undefined)
+				break;
+
 			if(card2.id == 2 || card2.id == 3 || card2.id == 10){
 				card = card2;
 				i = this.playingDeck.length-j;
-				console.log('Considering card : ' card2.id);
 			}
-			else if(card2.id > card.id){
+			else if(card2.id > card.id && !(card.id == 2 || card.id == 3 || card.id == 10)){
 				card = card2;
 				i = this.playingDeck.length-j;
-				console.log('Considering card : ' card2.id);
 			}
-			else
-				console.log('Skipped card : ' card2.id);
 
 			j -= 1;
 		}
