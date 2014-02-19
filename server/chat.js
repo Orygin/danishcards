@@ -43,12 +43,14 @@ function gameChat() {
 		else
 			return {isCommand:true, message: 'Invalid password'};
 	});
-	this.on('/giffcards', 'Cheat : Replace hand with new cards', ['cheat'],  function () {
-		gameRules.renewHand(socket);
+	this.on('/askew', 'Cheat : Skew your card draws', ['cheat'],  function (arg) {
+		if(arg.length <= 1)
+			return {isCommand:true, message: "Missing argument"};
 
-		return {isCommand:true, message: "giffen new cards"};
+		arg[0].player.askew = arg[1];
+
+		return {isCommand:true, message: "You are now skewing your draws by " + arg[1]};
 	});
-
 	this.on('/plsrdy', 'Play a please ready sound to everybody',  ['admin', 'replicated'], function () {
 		this.io.sockets.emit('play sound rdy');
 

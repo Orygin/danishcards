@@ -260,9 +260,27 @@ danishGameRules.prototype.nextPlayerTurn = function () {
 }
 danishGameRules.prototype.drawCard = function (player) {
 	if(this.playingDeck.length > 0){
-		player.emit('draw card', this.playingDeck[this.playingDeck.length-1]);
-		player.player.handCards[player.player.handCards.length] = this.playingDeck[this.playingDeck.length-1];
-		this.playingDeck.splice(-1,1);
+		var j = player.player.askew;
+		var i = this.playingDeck.length-1;
+		var card = this.playingDeck[this.playingDeck.length-1];
+		while(j > 0)
+		{
+			var card2 = this.playingDeck[this.playingDeck.length-j];
+
+			if(card2.id == 2 || card2.id == 3 || card2.id == 10){
+				card = card2;
+				i = this.playingDeck.length-j;
+			}
+			else if(card2.id > card.id){
+				card = card2;
+				i = this.playingDeck.length-j;
+			}
+
+			j -= 1;
+		}
+		player.emit('draw card', card);
+		player.player.handCards[player.player.handCards.length] = card;
+		this.playingDeck.splice(i,1);
 		this.playerManager.broadcastPickingDeckSize();
 	}
 }
