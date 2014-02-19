@@ -34,12 +34,6 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 })
 
 .controller('Main', function ($scope, $location, $window){
-	$scope.title = "Danish";
-	if($location.host() == "congo.ledessert.eu")
-		$scope.title = "Congo";
-	else if($location.host() == "sauce.ledessert.eu")
-		$scope.title = "Sauce et re Sauce";
-
 	$scope.alerts = [];
 	$scope.addAlert = function(mesg, level) {
 		$scope.alerts.push({msg: mesg, type: level});
