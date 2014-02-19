@@ -34,7 +34,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 })
 
 .controller('Main', function ($scope, $location, $window){
-	$scope.title = "Danish";
+	$scope.title = "TEST";
 	if($location.host() == "congo.ledessert.eu")
 		$scope.title = "Congo";
 	else if($location.host() == "sauce.ledessert.eu")
