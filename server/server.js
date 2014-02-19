@@ -41,9 +41,18 @@ io.set('log level', 1);
 server.listen(Number(process.env.PORT || 80));
 
 io.sockets.on('connection', function (socket) {
-	makeSocket.call(socket);
+  makeSocket.call(socket);
 });
 
-process.on('exit', function () {
+process.on('exit', function (code) {
   accountManager.saveToFile(true);
+  console.log('exiting');
+  if(code == 1337){
+    var exec = require('child_process').exec;
+    exec('./restartserver.sh', {cwd: process.env.PWD});  
+  }
+});
+
+app.get('/restart', function(req, res){
+  process.exit(1337);
 });
