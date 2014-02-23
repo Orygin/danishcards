@@ -34,7 +34,9 @@ io.sockets.emit = function (name, data, ignore) {
 
 process.env.PWD = process.cwd()
 
+app.use(express.compress());
 app.use(express.static(process.env.PWD+'/client/'));
+
 //app.use(express.logger());
 io.set('log level', 1);
 
