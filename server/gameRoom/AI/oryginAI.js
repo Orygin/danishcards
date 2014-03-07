@@ -1,5 +1,4 @@
-var baseAI 	= require('./baseAI'),
-	_g		= require('../globals');
+var baseAI 	= require('./baseAI');
 
 oryginAI.prototype = baseAI.prototype;
 oryginAI.prototype.constructor = oryginAI;
@@ -8,7 +7,7 @@ function oryginAI() {
 	baseAI.call(this);
 
 	this.onCreate = function (state) {
-		if(state.gameState == _g.GAMESTATES.NOTPLAYING)
+		if(state.gameState == this.hostRoom.GAMESTATES.NOTPLAYING)
 			this.socket.emit('set ready');
 	}
 	// The client has to handle these functions accordingly,
@@ -27,7 +26,6 @@ function oryginAI() {
 	});
 
 	this.on('picking deck size', function (size) {
-		console.log('AI ' + this.player.name + " rcved picking size : " + size);
 	});
 
 	this.on('player turn', function (playerName) {

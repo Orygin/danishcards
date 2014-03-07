@@ -1,4 +1,4 @@
-<div>
+<div ng-controller="gameCtrl">
 	<span ng-show="gameState.name == 'Not Playing'">Ready : <a href="#" ng-click="toggleReady()">{{ready}}</a><br></span>
 	
 	<div ng-include="'tpl/players.html'"></div><br>

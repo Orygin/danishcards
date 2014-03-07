@@ -3,34 +3,15 @@ var express = require('express')
   , http = require('http')
   , server = http.createServer(app)
   , io = require('socket.io').listen(server)
-  , gameRules = require('./danishGameRules')
-  , Player = require('./player')
-  , playerManager = require('./playerManager')
-  ,	gameChat = require('./chat')
   , accountManager = require('./accountManager')
-  , makeSocket = require('./makeSocket')
-  , voteSystem = require('./voteSystem');
-
-// hijack sockets.emit to account for AIs
-io.sockets.oemit = io.sockets.emit;
-io.sockets.emit = function (name, data, ignore) {
-	this.oemit(name, data); // original emit
-
-	playerManager.forEachAI(function (ai) {
-		if(ignore === undefined)
-			ai.emit(name, data);
-		else if(ignore.player.name != ai.player.name)
-			ai.emit(name, data);
-	});
-};
+  , roomService = require('./roomService');
   
-  accountManager.readFromFile();
-  gameRules.playerManager = playerManager;
-  gameRules.io = io;
-  gameChat.io = io;
-  gameChat.gameRules = gameRules;
-  gameChat.playerManager = playerManager;
-  playerManager.gameRules = gameRules;
+accountManager.readFromFile();
+
+roomService.io = io;
+roomService.accountManager = accountManager;
+
+roomService.createRoom('tamere');
 
 process.env.PWD = process.cwd()
 
@@ -43,7 +24,20 @@ io.set('log level', 1);
 server.listen(Number(process.env.PORT || 80));
 
 io.sockets.on('connection', function (socket) {
-  makeSocket.call(socket);
+  socket.on('activate', function (data) {
+    if(!accountManager.connect(data.name, data.pw))
+      socket.emit('error', 'failed login');
+
+    socket.playerName = data.name;
+
+    var ret = {};
+    ret.player = accountManager.getAccount(data.name);
+    ret.rooms = roomService.getRoomsInfos();
+    socket.emit('join lounge', ret);
+  });
+  socket.on('join room', function (name) {
+      roomService.joinRoom(socket, name);
+  });
 });
 
 process.on('exit', function (code) {
