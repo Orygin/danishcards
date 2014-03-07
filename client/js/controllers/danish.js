@@ -55,7 +55,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		        {
 		          $scope.connectionStatus = "disconnected";
 		          $scope.addAlert('Username already taken / wrong password / kicked', 'danger');
-		          socket.disconnect();	
+		          socket.disconnect();
+		        }
+		        else if(name == 'failed room creation'){
+					$scope.addAlert('Could not create room!', 'warning');
 		        }
       		});
 		});

@@ -1,6 +1,6 @@
 function gameCtrl ($scope) {
-	$scope.playerName = "";
-	$scope.password = "";
+	$scope.roomName = "";
+
 	$scope.players = [];
 	$scope.pickingStackSize = 52;
 	$scope.gameState = {};
@@ -26,8 +26,9 @@ function gameCtrl ($scope) {
 
 		$scope.socket.on('current state', function (data) {
 			$scope.$apply(function () {
-				$scope.glog += 'Connected to room : \n';
+				$scope.glog += 'Joined to room : ' + data.roomName + '\n';
 
+				$scope.roomName = data.roomName;
 				$scope.players = data.players;
 				$scope.gameState = data.gameState;
 				$scope.pickingStackSize = data.pickingStackSize;
@@ -581,6 +582,10 @@ function gameCtrl ($scope) {
 			$scope.socket.emit('set ready');
 			$scope.ready = true;
 		}
+	};
+	$scope.leaveRoom = function() {
+		console.log('Leaving room');
+		$scope.socket.emit('leave room', $scope.roomName);
 	};
 };
 function sortCards (c1,c2) {

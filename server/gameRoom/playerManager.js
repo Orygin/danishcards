@@ -25,7 +25,7 @@ playerManager.prototype.addPlayer = function (socket, name){
 
 	this.players[this.players.length] = socket;
 
-	socket.broadcast.emit('user connected', name);
+	socket.broadcast.to(this.hostRoom.roomName).emit('user connected', name);
 
 	return 'ok';
 }
@@ -55,13 +55,15 @@ playerManager.prototype.removePlayer = function (socket){
 
 	for (var i = this.players.length - 1; i >= 0; i--) {
 		if(this.players[i].player.name == socket.player.name){
-			this.players.splice(i,1);
-
 			if(this.emptyHand(socket))
 				this.broadcastPickingDeckSize();
 
-			socket.broadcast.emit('user disconnected', socket.player.name);
+			this.players.splice(i,1);
+
+			this.hostRoom.sockets.emit('user disconnected', socket.player.name);
 			this.hostRoom.emit('player disconnect', socket);
+
+			socket.player = undefined;
 
 			return true;
 		}
@@ -138,7 +140,7 @@ playerManager.prototype.endGame = function () {
 	for (var i = this.players.length - 1; i >= 0; i--) {
 			this.players[i].player.ready = false;
 
-			this.players[i].broadcast.emit('player unready', this.players[i].player.name);
+			this.players[i].broadcast.to(this.hostRoom.roomName).emit('player unready', this.players[i].player.name);
 		};
 }
 playerManager.prototype.getPlayers = function () {
@@ -170,7 +172,7 @@ playerManager.prototype.broadcastPlayersTableSize = function () {
 	};	
 }
 playerManager.prototype.broadcastPlayerHandSize = function (player) {
-	player.broadcast.emit('playing hand size', {name: player.player.name, size: player.player.handCards.length});
+	player.broadcast.to(this.hostRoom.roomName).emit('playing hand size', {name: player.player.name, size: player.player.handCards.length});
 }
 playerManager.prototype.tappedCard = function (socket, card) {
 	if(socket.player.tappedCards.length >= 3)

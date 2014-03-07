@@ -8,19 +8,9 @@ var gameChat = require('./chat'),
 function overlayIo (io, host) {
 	this.io = io;
 	this.hostRoom = host;
-	this.broadcastE = false;
 }
-overlayIo.prototype.__defineGetter__('broadcast', function () { // Screen to io
-	this.broadcastE = true;
-	return this;
-});
 overlayIo.prototype.emit = function(name, data, ignore) {
-	if(this.broadcastE){
-		this.broadcastE = false;
-		this.io.broadcast.emit(name, data);
-	}
-	else
-		this.io.emit(name, data); // original emit
+	this.io.sockets.in(this.hostRoom.roomName).emit(name, data); // original emit
 
 	this.hostRoom.playerManager.forEachAI(function (ai) {
 		if(ignore === undefined)
@@ -52,7 +42,6 @@ function playRoom(name, io) {
 	this.voteSystem = new voteSystem(this);
 
 	this.on('player disconnect', function (socket) {
-		this.playerManager.removePlayer(this);
 	});
 };
 playRoom.prototype.on = function(name, fct) {
@@ -92,6 +81,11 @@ playRoom.prototype.canJoin = function(socket) {
 playRoom.prototype.playerJoin = function(socket) {
 	makeSocket.call(socket, this);
 	this.playerManager.addPlayer(socket, socket.playerName);
-	socket.emit('join room');
+	socket.emit('join room', this.roomName);
+	socket.join(this.roomName);
+};
+playRoom.prototype.playerLeave = function(socket) {
+	this.playerManager.removePlayer(socket);
+	socket.leave(this.roomName);
 };
 module.exports = playRoom;

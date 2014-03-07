@@ -1,12 +1,16 @@
 <div ng-controller="loungeCtrl">
 	<div class="title">Lounge</div>
+	<div createRoomButton class="createRoomButton" ng-init="ButtonActivated = false">
+		<input type="text" ng-model="roomName" ng-class="{loungeInputActivated: ButtonActivated}">
+		<div class="loungeButton" ng-class="{loungeButtonActivated: ButtonActivated}" ng-click="clickCreateRoom()">Create room</div>
+	</div>
 	<div class="roomService">
 		<div class="room" ng-repeat="room in lounge.rooms" ng-click="joinRoom(room.name)">
 			{{room.name}}
 			<span style="text-align:right!important">{{room.players}}</span>
 		</div>
 	</div>
-	<div class="footer">
+	<footer class="footer navbar-fixed-bottom">
 		<p>Game created by Louis Geuten. Graciously hosted by Maxime Robaux. Source available on <a href="https://github.com/Orygin/danishcards">github</a></p>
-	</div>
+	</footer>
 </div>

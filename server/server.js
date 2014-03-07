@@ -11,8 +11,6 @@ accountManager.readFromFile();
 roomService.io = io;
 roomService.accountManager = accountManager;
 
-roomService.createRoom('tamere');
-
 process.env.PWD = process.cwd()
 
 app.use(express.compress());
@@ -29,14 +27,19 @@ io.sockets.on('connection', function (socket) {
       socket.emit('error', 'failed login');
 
     socket.playerName = data.name;
-
-    var ret = {};
-    ret.player = accountManager.getAccount(data.name);
-    ret.rooms = roomService.getRoomsInfos();
-    socket.emit('join lounge', ret);
+    roomService.joinLounge(socket, data.name);
   });
   socket.on('join room', function (name) {
       roomService.joinRoom(socket, name);
+  });
+  socket.on('leave room', function (name) {
+      roomService.leaveRoom(socket, name);
+  });
+  socket.on('create room', function (name) {
+      if(roomService.createRoom(name))
+        roomService.joinRoom(socket, name);
+      else
+        socket.emit('error', 'failed room creation');
   });
 });
 

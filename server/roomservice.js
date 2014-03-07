@@ -9,7 +9,7 @@ function roomService() {
 	this.playingRooms = [];
 
 	this.roomDelay = 60*1000; // check every 60 seconds
-	setTimeout(this.watchForEmptyRooms, this.roomDelay);
+	setTimeout(this.think, this.roomDelay, this);
 };
 
 roomService.prototype.createRoom = function(roomName) {
@@ -23,23 +23,35 @@ roomService.prototype.createRoom = function(roomName) {
 roomService.prototype.getRoom = function(roomName) {
 	return this.playingRooms[roomName];
 };
-roomService.prototype.watchForEmptyRooms = function() {
-	for(r in this.playingRooms)
+roomService.prototype.think = function(self) {
+	for(var r in self.playingRooms) // Remove empty rooms
 	{
-		var ro = this.playingRooms[r];
+		var ro = self.playingRooms[r];
+		if(ro === undefined)
+			continue;
+
 		if(ro.playerManager.getPlayers().length == 0){
 			ro.remove();
-			this.playingRooms[r] = undefined;
+			self.playingRooms[r] = undefined;
 		}
 	}
 
-	setTimeout(this.watchForEmptyRooms, this.roomDelay);
+	setTimeout(self.think, self.roomDelay, self);
+};
+roomService.prototype.joinLounge = function(socket, name) {
+	var ret = {};
+    ret.player = require('./accountManager').getAccount(name);
+    ret.rooms = this.getRoomsInfos();
+    socket.emit('join lounge', ret);
 };
 roomService.prototype.getRoomsInfos = function() {
 	var ret = [], i = 0;
-	for(r in this.playingRooms)
+	for(var r in this.playingRooms)
 	{
 		var ro = this.playingRooms[r];
+		if(ro === undefined)
+			continue;
+		
 		ret[i] = ro.getInfos();
 		i++;
 	}
@@ -56,5 +68,14 @@ roomService.prototype.joinRoom = function(socket, name) {
 	else
 		return false;
 };
+roomService.prototype.leaveRoom = function(socket, name) {
+	var room = this.playingRooms[name];
 
+	if(room === undefined)
+		return false;
+	
+	room.playerLeave(socket);
+
+	this.joinLounge(socket, socket.name);
+};
 module.exports = new roomService();

@@ -99,7 +99,7 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 		var source = socket.player.handCards;
 		if(socket.player.handCards.length == 0 && socket.player.tappedCards.length > 0){
 			source = socket.player.tappedCards;
-			socket.broadcast.emit('play tapped cards', {name: socket.player.name, cards: cards});
+			socket.broadcast.to(this.hostRoom.roomName).emit('play tapped cards', {name: socket.player.name, cards: cards});
 		}
 
 		for (var i = source.length - 1; i >= 0; i--) {
@@ -180,7 +180,7 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 			this.playingStack[this.playingStack.length] = cards[i];
 		};
 
-		socket.broadcast.emit('play tapped cards', {name: socket.player.name, cards: cards});
+		socket.broadcast.to(this.hostRoom.roomName).emit('play tapped cards', {name: socket.player.name, cards: cards});
 
 		for (var i = socket.player.tappedCards.length - 1; i >= 0; i--) {
 			for (var j = cards.length - 1; j >= 0; j--) {

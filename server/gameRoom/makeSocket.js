@@ -2,14 +2,15 @@
 
 module.exports = function(host) {
 	this.on('disconnect', function () {
-		host.emit('player disconnect', this);
+		host.playerManager.removePlayer(this);
 	});
 	this.on('get current state', function () {
 		this.emit('current state', {	playingStack: host.gameRules.playingStack,
 										pickingStackSize: host.gameRules.playingDeck.length, 
 										gameState: host.gameState, 
 										players: host.playerManager.getPlayerList(),
-										availableCommands: host.gameChat.getCommandList()	});
+										availableCommands: host.gameChat.getCommandList(),
+										roomName: host.roomName	});
 	});
 	this.on('set ready', function () {
 		host.playerManager.setPlayerReady(this);
@@ -19,7 +20,7 @@ module.exports = function(host) {
 	});
 	this.on('set tapped card', function (card) {
 		if(host.playerManager.tappedCard(this, card))
-			this.broadcast.emit('tapped card', {name: this.player.name, card: card});
+			this.broadcast.to(host.roomName).emit('tapped card', {name: this.player.name, card: card});
 	});
 	this.on('play cards', function (cards) {
 		host.gameRules.playCards(this, cards);

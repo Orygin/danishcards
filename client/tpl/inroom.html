@@ -1,4 +1,5 @@
 <div ng-controller="gameCtrl">
+	{{playerName}}
 	<span ng-show="gameState.name == 'Not Playing'">Ready : <a href="#" ng-click="toggleReady()">{{ready}}</a><br></span>
 	
 	<div ng-include="'tpl/players.html'"></div><br>
@@ -35,4 +36,9 @@
 	<a href="#" ng-click="takeStack()" ng-show="canTakeStack()">Take stack</a> - <a href="#" ng-click="playSelected()">Play card(s)</a>
 
 	<div ng-include="'tpl/soundTpl.html'"></div>
+	<footer class="footer navbar-fixed-bottom">
+		<p>Room '{{roomName}}' - 
+			<span ng-click="leaveRoom()">Leave room</span>
+		</p>
+	</footer>
 </div>
