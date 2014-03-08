@@ -25,22 +25,20 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		if(playerName === "" || playerName === undefined ||password === "" || password === undefined)
 			return $scope.addAlert('Can\t login with empty username or password', 'danger');;
 
-		var socket = io.connect('/');
+		var socket = io.connect('/', {'force new connection': true, 'reconnect': false});
 		$scope.socket = socket;
 		$scope.createSocketOn(socket);
-		$scope.socket.createdGameEvents = false;
 
 		$scope.playerName = playerName;
 		$scope.password = password;
-
+	}
+	$scope.createSocketOn = function(socket) {
 		socket.on('connect', function () {
 			$scope.$apply(function () {
 				$scope.connectionStatus = "connecting";
 			});
-			socket.emit('activate', {name: playerName, pw: password});
+			socket.emit('activate', {name: $scope.playerName, pw: $scope.password});
 		});
-	}
-	$scope.createSocketOn = function(socket) {
 		socket.on('error', function (name, value) {
 	    	$scope.$apply(function(){
 		        if(name == 'too many players')
@@ -69,6 +67,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		socket.on('disconnect', function () {
 			$scope.connectionStatus = "disconnected";
 			$scope.addAlert('You have been disconnected', 'danger');
+			console.dir(socket);
+			console.dir(io);
+
+			socket.removeAllListeners();
 		});
 		socket.on('join lounge', function (data) {
 			$scope.$apply(function () {

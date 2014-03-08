@@ -15,7 +15,7 @@ roomService.prototype.createRoom = function(data) {
 	if(this.getRoom(data.roomName) !== undefined)
 		return false;
 
-	this.playingRooms[data.roomName] = new room(data, this.io, this);
+	this.playingRooms[data.roomName] = new room(data, this);
 	this.updateLounge();
 
 	return true;
@@ -91,7 +91,18 @@ roomService.prototype.updateLounge = function() {
 	var ret = this.getRoomsInfos();
 
 	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
-		this.loungePlayers[i].emit('update lounge', ret);
+		this.loungePlayers[i].volatile.emit('update lounge', ret);
+	};
+};
+roomService.prototype.kickPlayer = function(name, timeSec) {
+	require('./accountManager').kickPlayer(name, timeSec);
+
+	var clients = this.io.sockets.clients();
+	for (var i = clients.length - 1; i >= 0; i--) {
+		if(clients[i].player.name === name){
+			clients[i].disconnect();
+			break;
+		}
 	};
 };
 module.exports = new roomService();

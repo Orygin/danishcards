@@ -43,12 +43,12 @@ function gameChat(host) {
 
 		return {isCommand:true, message: "You are now skewing your draws by " + arg[1]};
 	});
-	this.on('/plsrdy', 'Play a please ready sound to everybody',  ['admin', 'replicated'], function () {
+	this.on('/plsrdy', 'Play a please ready sound to everybody',  ['owner', 'replicated'], function () {
 		this.hostRoom.sockets.emit('play sound rdy');
 
 		return {isCommand:true, message: "Please ready up!"};
 	});
-	this.on('/cheats', 'Enable or disable cheats', ['admin', 'replicated'], function(arg) {
+	this.on('/cheats', 'Enable or disable cheats', ['owner', 'replicated'], function(arg) {
 		if(arg.length < 2)
 			return {isCommand:true, message: "cheats : " + this.hostRoom.cheats};
 
@@ -57,7 +57,7 @@ function gameChat(host) {
 		return {isCommand:true, message: "cheats changed to : " + arg[1]};
 	});
 
-	this.on('/createAI', 'Creates a bot, needs a name as argument',  ['admin'], function (arg) {
+	this.on('/createAI', 'Creates a bot, needs a name as argument',  ['owner'], function (arg) {
 		if(arg.length < 2)
 			return {isCommand:true, message: "Missing argument"};
 
@@ -75,19 +75,19 @@ function gameChat(host) {
 		else
 			return {isCommand:true, message: "Could not add AI : Unknown error"};
 	});
-	this.on('/setAIRdy', 'Sets a bot ready',  ['admin'], function (arg) {
+	this.on('/setAIRdy', 'Sets a bot ready',  ['owner'], function (arg) {
 		if(this.hostRoom.playerManager.setAIReady(arg[1]))
 			return {isCommand:true, message: "AI set ready"};
 		else
 			return {isCommand:true, message: "Could not set AI ready"};
 	});
-	this.on('/setAIUnRdy', 'Sets a bot unready',  ['admin'], function (arg) {
+	this.on('/setAIUnRdy', 'Sets a bot unready',  ['owner'], function (arg) {
 		if(this.hostRoom.playerManager.setAIUnready(arg[1]))
 			return {isCommand:true, message: "AI set unready"};
 		else
 			return {isCommand:true, message: "Could not set AI unready"};
 	});
-	this.on('/removeAI', 'removes an AI from the game', ['admin'], function(arg) {
+	this.on('/removeAI', 'removes an AI from the game', ['owner'], function(arg) {
 		if(this.hostRoom.playerManager.removeAI(arg[1]))
 			return {isCommand:true, message: "AI removed"};
 		else
@@ -99,13 +99,26 @@ function gameChat(host) {
 		return {isCommand:true, message: "Accounts saved"};
 	});
 	this.on('/vote', 'Allow players to vote or create votes', [], function (args) {
+		if(args.length < 2)
+			return {isCommand:true, message: this.hostRoom.voteSystem.listVotes()};
+
 		this.hostRoom.voteSystem.castVote(args);
 		return {isCommand:true, message: ""};
+	});
+	this.on('/kick', 'Kicks a player', ['owner'], function (args) {
+		if(args.length < 2)
+			return {isCommand:true, message: 'Please give a player name'};
+
+		this.hostRoom.roomService.kickPlayer(args[1]);
+		return {isCommand:true, message: "Player " + args[1] + ' kicked.'};
 	});
 }
 
 gameChat.prototype.rcvChat = function(socket, msg) {
 	var cmd = this.parseCommand(socket, msg);
+
+	if(cmd.message === '')
+		return;
 
 	if(!cmd.isCommand)
 		this.hostRoom.sockets.emit('chat message', {player: socket.player.name, message: msg});
@@ -136,6 +149,13 @@ gameChat.prototype.parseCommand = function(socket, msg) {
 
 			if(!acm.isPlayerAdmin(socket.player.name))
 				return {isCommand:true, message: "You don't have admin rights"};
+		}
+		else if(flag == 'owner')
+		{
+			var acm = require('../accountManager');
+
+			if(!acm.isPlayerAdmin(socket.player.name) && this.hostRoom.owner !== socket.player.name)
+				return {isCommand:true, message: "You don't have the rights to do that"};
 		}
 		else if(flag == 'cheat')
 		{

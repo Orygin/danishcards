@@ -13,7 +13,7 @@ function voteSystem (host) {
 			return false;
 		},
 		function (arg) {
-			this.hostRoom.accountManager.kickPlayer(arg[2], 60);
+			this.hostRoom.roomService.kickPlayer(arg[2], 60);
 		}
 	);
 	
@@ -31,10 +31,12 @@ voteSystem.prototype.addVote = function(name, completeness, validity, onComplete
 
 voteSystem.prototype.castVote = function(args) {
 	if(this.currentVote.name === ""){
-		if(!this.possibleVotes[args[1]].valid(args)){
-			args[0].emit('chat command', {message:'Could not start vote : vote invalid'});
-			return;
-		}
+		if(this.possibleVotes[args[1]] === undefined)
+			return args[0].emit('chat command', {message:'Could not start vote : vote doesn\'t exist'});
+
+		if(!this.possibleVotes[args[1]].valid.call(this,args))
+			return args[0].emit('chat command', {message:'Could not start vote : vote invalid'});
+
 		this.currentVote.name = args[1];
 		this.currentVote.args = args; // remove the vote name from args
 		this.currentVote.voters = 1;
@@ -78,13 +80,14 @@ voteSystem.prototype.checkVote = function() {
 	if(this.currentVote.name === "")
 		return false;
 
-	if(this.possibleVotes[this.currentVote.name].threshold() <= this.currentVote.voters){
+	if(this.possibleVotes[this.currentVote.name].threshold.call(this) <= this.currentVote.voters){
 		var func = this.possibleVotes[this.currentVote.name];
 		var args = this.currentVote.args;
+		this.hostRoom.gameChat.serverSay('Vote passed : ' + this.currentVote.name);
+		
 		this.endVote();
 
-		func(args); // endVote before, avoids firing twice if player gets disconnected
-		this.hostRoom.gameChat.serverSay('Vote passed : ' + this.currentVote.name);
+		func.call(this,args); // endVote before, avoids firing twice if player gets disconnected
 
 		return true;
 	}
@@ -99,9 +102,10 @@ voteSystem.prototype.endVote = function() {
 };
 voteSystem.prototype.listVotes = function() {
 	var res = "";
-	for(i in this.possibleVotes)
+	for(var i in this.possibleVotes)
 	{
 		res += i + "\n";
 	}
+	return res;
 };
 module.exports = voteSystem;

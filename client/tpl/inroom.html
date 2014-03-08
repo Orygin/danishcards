@@ -1,18 +1,17 @@
 <div ng-controller="gameCtrl">
-	{{playerName}}
 	<span ng-show="gameState.name == 'Not Playing'">Ready : <a href="#" ng-click="toggleReady()">{{ready}}</a><br></span>
 	
 	<div ng-include="'tpl/players.html'"></div><br>
 
-	<textarea scroll-glue cols="50" rows="20" class="logger" disabled="disabled">{{glog}}</textarea>
+	<textarea class="logger form-control" scroll-glue cols="50" rows="20" disabled="disabled">{{glog}}</textarea>
 
 	<div class="playerList">
 		<div ng-repeat="plr in players">
 			{{$index + 1}} - {{plr.name}} <i class="glyphicon glyphicon-ok" ng-show="plr.ready && gameState.name == 'Not Playing'"></i> <span ng-show="shouldTarget && plr.name != playerName && hasCards($index)"><a href="#" ng-click="aceTarget(plr.name)"><i class="glyphicon glyphicon-font"></i></a></span> <i class="glyphicon glyphicon-arrow-left" ng-show="plr.name == playerTurn && !shouldTarget"></i>
 		</div>
 		<br>
-		<textarea scroll-glue cols="50" rows="20" disabled="disabled">{{gchat}}</textarea><br>
-		<input z-keypress="alert($event)" style="width: 100%">
+		<textarea class="form-control" scroll-glue cols="50" rows="20" disabled="disabled">{{gchat}}</textarea><br>
+		<input class="form-control" z-keypress="alert($event)" style="width: 100%">
 	</div>
 
 	Game status : {{gameState.name}}. Deck size left : {{pickingStackSize}}<br>

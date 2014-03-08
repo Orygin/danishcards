@@ -34,6 +34,8 @@ a:hover{
 }
 .logger
 {
+	width: 352px;
+	margin-right: 2px;
 	float:left;
 }
 .playerList
@@ -163,7 +165,7 @@ a:hover{
     top: 0;
     left: 0;
     z-index: -1;
-    background-color: red;
+    background-color: #A9EEBF;
     padding-left: 5px;
     vertical-align: middle;
     text-align: left;

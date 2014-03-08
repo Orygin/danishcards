@@ -31,7 +31,7 @@ playerManager.prototype.addPlayer = function (socket, name){
 }
 
 playerManager.prototype.addAI = function(name) {
-	if(accountManager.getAccount(name)){
+	if(require('../accountManager').getAccount(name)){
 		return 'name';
 	}// bots may not take an already existing account name (which would prevent a player from connecting)
 

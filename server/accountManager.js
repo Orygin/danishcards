@@ -48,9 +48,6 @@ simpleAccountManager.prototype.connect = function(name, pw) {
 		return false;
 };
 simpleAccountManager.prototype.kickPlayer = function(name, timeSec) {
-	// We try to remove the player anyway because AIs
-	roomService.kickPlayer(name);
-
 	var acc = this.getAccount(name);
 
 	if(!acc)

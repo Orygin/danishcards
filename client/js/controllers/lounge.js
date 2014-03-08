@@ -11,6 +11,6 @@ function loungeCtrl($scope) {
 		if($scope.roomName === '' || $scope.roomName === undefined)	
 			return $scope.addAlert('Can\'t create room with empty name', 'warning');
 
-		$scope.socket.emit('create room', {roomName: $scope.roomName, cheats: $scope.cheats});
+		$scope.socket.emit('create room', {roomName: $scope.roomName, cheats: $scope.cheats, owner: $scope.playerName});
 	};
 };
