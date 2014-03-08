@@ -15,7 +15,10 @@
 	</div>
 
 	Game status : {{gameState.name}}. Deck size left : {{pickingStackSize}}<br>
-	<div class="playingStack"><img ng-repeat="card in playingStack track by $index" ng-src="img/cards/{{card.img}}.png"/></div><br>
+	<div class="playingStack"><img ng-repeat="card in playingStack track by $index" 
+									ng-src="img/cards/{{card.img}}.png"
+									ng-class="{repeatingCard: card.id == playingStack[$index-1].id}"/>
+	</div><br>
 
 	Your hand :
 	<img	ng-repeat="card in playingHand track by $index" 
