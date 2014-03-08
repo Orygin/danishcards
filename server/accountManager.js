@@ -1,5 +1,5 @@
 var fs = require('fs'),
-	roomService = require('./roomervice');
+	roomService = require('./roomservice');
 
 function simpleAccountManager () {
 	this.accounts = [];
