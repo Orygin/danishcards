@@ -1,15 +1,7 @@
-var gameRules = require('./danishGameRules'),
-	playerManager = require('./playerManager'),
-	_g = require('./globals');
-
-function gameChat() {
-	this.io = {};
+function gameChat(host) {
+	this.hostRoom = host;
 
 	this.commandCb = [];
-
-	this.gameRules = gameRules;
-
-	_g.gameChat = this;
 
 	this.on = function(name, desc, flags, fct) {
 		this.commandCb[name] = fct;
@@ -19,7 +11,7 @@ function gameChat() {
 
 	this.on('/help', 'display this', [], function (arg) {
 		if(arg.length > 1 && arg[1] == "vote")
-			return {isCommand:true, message: _g.voteSystem.listVotes()};
+			return {isCommand:true, message: this.hostRoom.voteSystem.listVotes()};
 
 		var response = "Available commands are : \n";
 
@@ -34,9 +26,9 @@ function gameChat() {
 		if(arg.length < 2)
 			return {isCommand:true, message: 'password missing'};
 
-		if(arg[1] == _g.rcon)
+		if(arg[1] == this.hostRoom.rcon)
 		{
-			var acm = require('./accountManager');
+			var acm = require('../accountManager');
 			acm.getAccount(arg[0].player.name).rank = 'admin';
 			return {isCommand:true, message: 'given admin rights'};
 		}
@@ -51,25 +43,25 @@ function gameChat() {
 
 		return {isCommand:true, message: "You are now skewing your draws by " + arg[1]};
 	});
-	this.on('/plsrdy', 'Play a please ready sound to everybody',  ['admin', 'replicated'], function () {
-		this.io.sockets.emit('play sound rdy');
+	this.on('/plsrdy', 'Play a please ready sound to everybody',  ['owner', 'replicated'], function () {
+		this.hostRoom.sockets.emit('play sound rdy');
 
 		return {isCommand:true, message: "Please ready up!"};
 	});
-	this.on('/sv_cheats', 'Enable or disable cheats', ['admin', 'replicated'], function(arg) {
+	this.on('/cheats', 'Enable or disable cheats', ['owner', 'replicated'], function(arg) {
 		if(arg.length < 2)
-			return {isCommand:true, message: "sv_cheats : " + _g.sv_cheats};
+			return {isCommand:true, message: "cheats : " + this.hostRoom.cheats};
 
-		_g.sv_cheats = arg[1] ? 1 : 0;
+		this.hostRoom.cheats = arg[1] ? 1 : 0;
 
-		return {isCommand:true, message: "Sv_cheats changed to : " + arg[1]};
+		return {isCommand:true, message: "cheats changed to : " + arg[1]};
 	});
 
-	this.on('/createAI', 'Creates a bot, needs a name as argument',  ['admin'], function (arg) {
+	this.on('/createAI', 'Creates a bot, needs a name as argument',  ['owner'], function (arg) {
 		if(arg.length < 2)
 			return {isCommand:true, message: "Missing argument"};
 
-		var res = this.playerManager.addAI(arg[1]);
+		var res = this.hostRoom.playerManager.addAI(arg[1]);
 
 		if(res == 'ok')
 			return {isCommand:true, message: "Bot added : " + arg[1]};
@@ -83,42 +75,55 @@ function gameChat() {
 		else
 			return {isCommand:true, message: "Could not add AI : Unknown error"};
 	});
-	this.on('/setAIRdy', 'Sets a bot ready',  ['admin'], function (arg) {
-		if(this.playerManager.setAIReady(arg[1]))
+	this.on('/setAIRdy', 'Sets a bot ready',  ['owner'], function (arg) {
+		if(this.hostRoom.playerManager.setAIReady(arg[1]))
 			return {isCommand:true, message: "AI set ready"};
 		else
 			return {isCommand:true, message: "Could not set AI ready"};
 	});
-	this.on('/setAIUnRdy', 'Sets a bot unready',  ['admin'], function (arg) {
-		if(this.playerManager.setAIUnready(arg[1]))
+	this.on('/setAIUnRdy', 'Sets a bot unready',  ['owner'], function (arg) {
+		if(this.hostRoom.playerManager.setAIUnready(arg[1]))
 			return {isCommand:true, message: "AI set unready"};
 		else
 			return {isCommand:true, message: "Could not set AI unready"};
 	});
-	this.on('/removeAI', 'removes an AI from the game', ['admin'], function(arg) {
-		if(this.playerManager.removeAI(arg[1]))
+	this.on('/removeAI', 'removes an AI from the game', ['owner'], function(arg) {
+		if(this.hostRoom.playerManager.removeAI(arg[1]))
 			return {isCommand:true, message: "AI removed"};
 		else
 			return {isCommand:true, message: "Could not remove AI"};
 	});
 	this.on('/saveAccounts', 'Saves all accounts to file', ['admin'], function () {
-		var acc = require('./accountManager');
+		var acc = require('../accountManager');
 		acc.saveToFile();
 		return {isCommand:true, message: "Accounts saved"};
 	});
 	this.on('/vote', 'Allow players to vote or create votes', [], function (args) {
-		_g.voteSystem.castVote(args);
+		if(args.length < 2)
+			return {isCommand:true, message: this.hostRoom.voteSystem.listVotes()};
+
+		this.hostRoom.voteSystem.castVote(args);
 		return {isCommand:true, message: ""};
+	});
+	this.on('/kick', 'Kicks a player', ['owner'], function (args) {
+		if(args.length < 2)
+			return {isCommand:true, message: 'Please give a player name'};
+
+		this.hostRoom.roomService.kickPlayer(args[1]);
+		return {isCommand:true, message: "Player " + args[1] + ' kicked.'};
 	});
 }
 
 gameChat.prototype.rcvChat = function(socket, msg) {
 	var cmd = this.parseCommand(socket, msg);
 
+	if(cmd.message === '')
+		return;
+
 	if(!cmd.isCommand)
-		this.io.sockets.emit('chat message', {player: socket.player.name, message: msg});
+		this.hostRoom.sockets.emit('chat message', {player: socket.player.name, message: msg});
 	else if(cmd.isReplicated)
-		this.io.sockets.emit('chat command', cmd);
+		this.hostRoom.sockets.emit('chat command', cmd);
 	else
 		socket.emit('chat command', cmd);
 };
@@ -140,15 +145,22 @@ gameChat.prototype.parseCommand = function(socket, msg) {
 		var flag = this.commandCb[cmd].flags[i];
 		if(flag == 'admin')
 		{
-			var acm = require('./accountManager');
+			var acm = require('../accountManager');
 
 			if(!acm.isPlayerAdmin(socket.player.name))
 				return {isCommand:true, message: "You don't have admin rights"};
 		}
+		else if(flag == 'owner')
+		{
+			var acm = require('../accountManager');
+
+			if(!acm.isPlayerAdmin(socket.player.name) && this.hostRoom.owner !== socket.player.name)
+				return {isCommand:true, message: "You don't have the rights to do that"};
+		}
 		else if(flag == 'cheat')
 		{
-			if(_g.sv_cheats != 1)
-				return {isCommand:true, message: "Cant exec command with sv_cheats off"};
+			if(this.hostRoom.cheats != 1)
+				return {isCommand:true, message: "Cant exec command with cheats off"};
 		}
 		else if (flag == 'replicated')
 			replic = true;
@@ -169,6 +181,6 @@ gameChat.prototype.getCommandList = function() {
 	return response;
 };
 gameChat.prototype.serverSay = function(msg) {
-	this.io.sockets.emit('chat command', {message: msg});
+	this.hostRoom.sockets.emit('chat command', {message: msg});
 };
-module.exports = new gameChat();
+module.exports = gameChat;

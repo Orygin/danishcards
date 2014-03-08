@@ -1,10 +1,8 @@
 var fs = require('fs'),
-	_g = require('./globals');
+	roomService = require('./roomService');
 
 function simpleAccountManager () {
 	this.accounts = [];
-
-	_g.accountManager = this;
 }
 function account(name, pw, rank) {
 	this.name = name;
@@ -41,7 +39,7 @@ simpleAccountManager.prototype.connect = function(name, pw) {
 	var acc = this.getAccount(name);
 
 	if(!acc)
-		return false;
+		return this.addAccount(name, pw);
 
 	if(acc.password == pw && !acc.isKicked())
 		return true;
@@ -50,9 +48,6 @@ simpleAccountManager.prototype.connect = function(name, pw) {
 		return false;
 };
 simpleAccountManager.prototype.kickPlayer = function(name, timeSec) {
-	// We try to remove the player anyway because AIs
-	_g.playerManager.kickPlayer(name);
-
 	var acc = this.getAccount(name);
 
 	if(!acc)

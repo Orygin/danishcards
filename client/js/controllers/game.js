@@ -1,57 +1,7 @@
-var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.directives', 'angular-audio-player'])
-
-.controller('Sound', function ($scope){
-	$scope.muted = false;
-
-	$scope.toggleMute = function () {
-		$scope.muted = !$scope.muted;
-	}
-
-	$scope.$on('connected', function(){
-		if(!$scope.muted)
-			$scope.connectSound.play();
-	});
-	$scope.$on('selfTurn', function () {
-		if(!$scope.muted)
-			$scope.selfTurnSound.play();
-	});
-	$scope.$on('playerTurn', function(){
-		if(!$scope.muted)
-			$scope.playerTurnSound.play();
-	});
-	$scope.$on('stackCut', function(){
-		if(!$scope.muted)
-			$scope.stackCutSound.play();
-	});
-	$scope.$on('plsrdy', function(){
-		if(!$scope.muted)
-			$scope.plsRdy.play();
-	});
-	$scope.$on('mention', function() {
-		if(!$scope.muted)
-			$scope.mentionSound.play();
-	});
-})
-
-.controller('Main', function ($scope, $location, $window){
-	$scope.alerts = [];
-	$scope.addAlert = function(mesg, level) {
-		$scope.alerts.push({msg: mesg, type: level});
-	};
-	$scope.closeAlert = function(index) {
-		$scope.alerts.splice(index, 1);
-	};
-	$scope.getTemplateForStatus = function () {
-		if($scope.connectionStatus == "disconnected")
-			return 'tpl/disconnected.html';
-		else if($scope.connectionStatus == "connected")
-			return 'tpl/connected.html';
-		else if($scope.connectionStatus == "connecting")
-			return 'tpl/disconnected.html';
-	};
+function gameCtrl ($scope) {
+	$scope.roomName = "";
 
 	$scope.players = [];
-	$scope.connectionStatus = "disconnected";
 	$scope.pickingStackSize = 52;
 	$scope.gameState = {};
 	$scope.playingHand = [];
@@ -64,8 +14,6 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.selectedCards = [];
 	$scope.shouldTarget = false;
 	$scope.shouldPlaySmall = false;
-	$scope.playerName = "";
-	$scope.password = "";
 	$scope.chatLine = "";
 	$scope.availableCommands = [];
 
@@ -76,60 +24,14 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.chatHistoryPos = -1;
 	$scope.chatHistoryValue = "";
 
-	$scope.connect = function (playerName, password) {
-		var socket = io.connect('/');
-		$scope.socket = socket;
-		$scope.createSocketOn(socket);
+	$scope.socket.removeAllListeners();
+	$scope.createSocketOn($scope.socket);
 
-		$scope.playerName = playerName;
-		$scope.password = password;
-
-		socket.on('connect', function () {
+		$scope.socket.on('current state', function (data) {
 			$scope.$apply(function () {
-				$scope.connectionStatus = "connecting";
-			});
-			socket.emit('activate', {name: playerName, pw: password});
-		});
-	}
-	$scope.createSocketOn = function(socket) {
-		socket.on('error', function (name, value) {
-	    	$scope.$apply(function(){
-		        if(name == 'too many players')
-		        {
-		          $scope.connectionStatus = "disconnected";
-		          $scope.addAlert('Too many players already. You can still observe', 'danger');
-		          socket.disconnect();
-		        }
-		        else if (name == 'name already in use')
-		        {
-		          $scope.connectionStatus = "disconnected";
-		          $scope.addAlert('name already in use', 'danger');
-		          socket.disconnect();
-		        }
-		        else if (name == 'couldn\'t log in')
-		        {
-		          $scope.connectionStatus = "disconnected";
-		          $scope.addAlert('Couldn\'t log in', 'danger');
-		          socket.disconnect();	
-		        }
-		        else if (name == 'failed login')
-		        {
-		          $scope.connectionStatus = "disconnected";
-		          $scope.addAlert('Username already taken / wrong password / kicked', 'danger');
-		          socket.disconnect();	
-		        }
-      		});
-		});
-		socket.on('disconnect', function () {
-			$scope.connectionStatus = "disconnected";
-			$scope.addAlert('You have been disconnected', 'danger');
-		});
-		socket.on('current state', function (data) {
-			console.log(data);
-			$scope.$apply(function () {
-				$scope.connectionStatus = "connected";
-				$scope.glog += 'Connected \n';
+				$scope.glog += 'Joined to room : ' + data.roomName + '\n';
 
+				$scope.roomName = data.roomName;
 				$scope.players = data.players;
 				$scope.gameState = data.gameState;
 				$scope.pickingStackSize = data.pickingStackSize;
@@ -141,7 +43,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.tableHand = 0;
 			})
 		});
-		socket.on('new game state', function (state) {
+		$scope.socket.on('new game state', function (state) {
 			$scope.$apply(function () {
 				$scope.gameState = state;
 				if(state.value = 1 && state.name == "Tapping phase") // tapping phase
@@ -156,14 +58,14 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			});
 		});
 
-		socket.on('user connected', function (pName) {
+		$scope.socket.on('user connected', function (pName) {
 			$scope.$apply(function () {
 				$scope.players[$scope.players.length] = {name:pName, ready: false, tableHand: 0, tappedHand: [], playingHand: 0};
 				$scope.glog += 'User connected : ' + pName + '\n';
 				$scope.$broadcast('connected');
 			});
 		});
-		socket.on('user disconnected', function (pName) {
+		$scope.socket.on('user disconnected', function (pName) {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					if($scope.players[i].name == pName)
@@ -172,7 +74,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.glog += 'User disconnected : ' + pName + '\n';
 			});
 		});
-		socket.on('player ready', function (pName) {
+		$scope.socket.on('player ready', function (pName) {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					if($scope.players[i].name == pName)
@@ -181,7 +83,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.glog += 'User ready : ' + pName + '\n';
 			});
 		});
-		socket.on('player unready', function (pName) {
+		$scope.socket.on('player unready', function (pName) {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					if($scope.players[i].name == pName)
@@ -190,29 +92,29 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.glog += 'User unready : ' + pName + '\n';
 			});
 		});
-		socket.on('new playing hand', function (hand) {
+		$scope.socket.on('new playing hand', function (hand) {
 			$scope.$apply(function () {
 				$scope.playingHand = hand;
 				$scope.playingHand.sort(sortCards);
 			});
 		});
-		socket.on('new table hand', function (size) {
+		$scope.socket.on('new table hand', function (size) {
 			$scope.$apply(function () {
 				$scope.tableHand = size;
 			});
 		});
-		socket.on('tapped card', function (data) {
+		$scope.socket.on('tapped card', function (data) {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					if($scope.players[i].name == data.name)
 					{
 						$scope.players[i].tappedHand[$scope.players[i].tappedHand.length] = data.card;
+						$scope.glog += $scope.players[i].name + ' tapped card : ' + data.card.id + " of " + data.card.family + '\n';
 					}
 				};
-				$scope.glog += 'Tapped card : ' + data.card.id + " of " + data.card.family + '\n';
 			});
 		});
-		socket.on('playing hand size', function (data) {
+		$scope.socket.on('playing hand size', function (data) {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					if($scope.players[i].name == data.name)
@@ -222,12 +124,12 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				};
 			});
 		});
-		socket.on('picking deck size', function (size) {
+		$scope.socket.on('picking deck size', function (size) {
 			$scope.$apply(function () {
 				$scope.pickingStackSize = size;
 			});
 		});
-		socket.on('player turn', function (plr) {
+		$scope.socket.on('player turn', function (plr) {
 			$scope.$apply(function () {
 				$scope.playerTurn = plr;
 				$scope.glog += 'Player turn : ' + plr +'\n';
@@ -237,14 +139,14 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 					$scope.$broadcast('playerTurn');
 			})
 		});
-		socket.on('draw card', function (card) {
+		$scope.socket.on('draw card', function (card) {
 			$scope.$apply(function () {
 				$scope.playingHand[$scope.playingHand.length] = card;
 				$scope.playingHand.sort(sortCards);
 				$scope.glog += 'Drawn card : ' + card.id + " of " + card.family + '\n';
 			});
 		});
-		socket.on('cards played', function (cards) {
+		$scope.socket.on('cards played', function (cards) {
 			$scope.$apply(function () {
 				for (var i = cards.length - 1; i >= 0; i--) {
 					$scope.playingStack[$scope.playingStack.length] = cards[i];
@@ -252,7 +154,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				};
 			});
 		});
-		socket.on('play tapped cards', function (data) {
+		$scope.socket.on('play tapped cards', function (data) {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					if($scope.players[i].name == data.name)
@@ -268,7 +170,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				};
 			});
 		});
-		socket.on('played table card', function (plr) {
+		$scope.socket.on('played table card', function (plr) {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					if($scope.players[i].name == plr)
@@ -278,7 +180,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				};
 			});
 		})
-		socket.on('take stack', function (stack) {
+		$scope.socket.on('take stack', function (stack) {
 			$scope.$apply(function () {
 				for (var i = stack.length - 1; i >= 0; i--) {
 					$scope.playingHand[$scope.playingHand.length] = stack[i];
@@ -287,36 +189,36 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.glog += 'Took stack : ' + stack.length + '\n';
 			});
 		});
-		socket.on('stack taken', function (plr) {
+		$scope.socket.on('stack taken', function (plr) {
 			$scope.$apply(function () {
 				$scope.glog += 'Player took stack : ' + plr + " :" + $scope.playingStack.length + '\n';
 			});
 		});
-		socket.on('stack cut', function () {
+		$scope.socket.on('stack cut', function () {
 			$scope.$apply(function () {
 				$scope.glog += 'Stack cut : ' + $scope.playingStack.length + '\n';
 				$scope.playingStack = [];
 				$scope.$broadcast('stackCut');
 			});
 		});
-		socket.on('select ace target', function () {
+		$scope.socket.on('select ace target', function () {
 			$scope.$apply(function () {
 				$scope.shouldTarget = true;
 			});
 		});
-		socket.on('ace targeted', function (name) {
+		$scope.socket.on('ace targeted', function (name) {
 			$scope.glog += 'Player targeted by ace : ' + name + '\n';
 			$scope.$apply(function () {
 				$scope.shouldTarget	 = false;
 			});
 		});
-		socket.on('force play smallest', function () {
+		$scope.socket.on('force play smallest', function () {
 			$scope.$apply(function () {
 				$scope.shouldPlaySmall = true;
 				$scope.glog += 'Begining round : play smallest card\n';
 			});
 		});
-		socket.on('gameEnd', function () {
+		$scope.socket.on('gameEnd', function () {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					$scope.players[i].tappedHand = [];
@@ -332,7 +234,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				$scope.ready = false;
 			});
 		});
-		socket.on('chat message', function (data) {
+		$scope.socket.on('chat message', function (data) {
 			$scope.$apply(function () {
 				$scope.gchat += data.player + " : " + data.message + "\n";
 				var words = data.message.split(' ');
@@ -342,17 +244,19 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 				};
 			});
 		});
-		socket.on('chat command', function (data) {
+		$scope.socket.on('chat command', function (data) {
 			$scope.$apply(function () {
 				$scope.gchat += data.message + "\n";
 			});
 		});
-		socket.on('play sound rdy', function () {
+		$scope.socket.on('play sound rdy', function () {
 			$scope.$apply(function() {
 				$scope.$broadcast('plsrdy');
 			});
 		});
-	};
+
+	$scope.socket.emit('get current state');
+
 	$scope.nextAutoComplete = function(msg) {
 		var words = msg.split(" ");
 
@@ -682,105 +586,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			$scope.ready = true;
 		}
 	};
-	$scope.getNumber = function(num) {
-		return new Array(num);   
+	$scope.leaveRoom = function() {
+		$scope.socket.emit('leave room', $scope.roomName);
 	};
-});
-app.directive('zKeypress', function(){
-  return {
-    restrict: 'A',
-    link: function(scope, elem, attr, ctrl) {
-      elem.bind('keydown', function($event){
-        scope.$apply(function(s) {
-        	if($event.which == 13){
-        		if(s.sendMessage(elem[0].value))
-        			elem[0].value = "";
-        	}
-        	else if($event.keyCode == 9){ //tab
-        		if($event.shiftKey)
-        			elem[0].value = s.previousAutoComplete(elem[0].value);
-        		else
-        			elem[0].value = s.nextAutoComplete(elem[0].value);
-        		$event.preventDefault();
-        	}
-        	else if($event.which == 8) {// backspace
-        		s.stopHistory();
-        		var res = s.removeAutoComplete(elem[0].value);
-        		if(res){
-        			elem[0].value = res;
-        			$event.preventDefault();
-        		}
-        	}
-        	else if($event.keyCode == 38){ // Up
-        		s.stopAutoComplete();
-        		elem[0].value = s.moveUpHistory(elem[0].value);
-        	}
-        	else if($event.keyCode == 40){ // down
-        		s.stopAutoComplete();
-        		elem[0].value = s.moveDownHistory(elem[0].value);
-        	}
-        	else
-        		s.stopAutoComplete();
-        });
-      });
-    }
-  };
-});
-app.directive('playerCard', function($window){
-  return {
-    restrict: 'E',
-    scope: {
-        sizeList: '=size',
-        activate: '=activate',
-    },
-    link: function(scope, elem, attr, ctrl) {
-    	elem[0].style.position = 'relative';
-    	resize();
-
-		angular.element($window).bind('resize',function(){
-    		scope.$apply(resize);
-		});
-
-    	function resize() {
-    		var parentSize = elem[0].parentElement.clientWidth - 10;
-    		var size = parentSize / 71;
-
-    		if(size <= scope.sizeList && scope.activate)
-    		{
-    			size = ((-parentSize+71)/(scope.sizeList)) + 71;
-    			size = Math.max(size, 0);
-
-    			elem[0].style.right = size + 'px';
-    			elem[0].style.marginRight = -size + 'px';
-			}
-    	}
-  	}
-  };
-});
+};
 function sortCards (c1,c2) {
 	return c1.id - c2.id;
-}
-app.controller('githubLog', function ($scope){
-	var script = document.createElement('script');
-	script.src = 'https://api.github.com/repos/orygin/danishcards/commits?callback=ghcb';
-
-	document.getElementsByTagName('head')[0].appendChild(script);
-
-	$scope.ghlog = "";
-	$scope.parseData = function(data) {
-		for (var i = data.length - 1; i >= 0; i--) {
-			$scope.ghlog += "\n" + data[i].commit.committer.name + " - " + data[i].commit.committer.date;
-			var lines = data[i].commit.message.match(/[^\r\n]+/g);
-			for (var j = 0; j <= lines.length - 1; j++) {
-				$scope.ghlog += "\n - " + lines[j]; //Each line gets an added dash
-			}
-		};
-	};
-});
-function ghcb(response) {
-  var data = response.data;
-  scope = angular.element(document.getElementsByClassName('ghLog')[0]).scope();
-  scope.$apply(function() {
-  	scope.parseData(data);
-  });
 }

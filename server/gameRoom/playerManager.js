@@ -2,19 +2,15 @@
 
 var baseBot = require('./AI/oryginAI'),
 	Player = require('./player'),
-	accountManager = require('./accountManager'),
-	gameChat = require('./chat'),
-	_g = require('./globals');
+	accountManager = require('../accountManager');
 
-function playerManager(){
+function playerManager(host){
 	this.players= [];
-	this.gameRules = {};
-
-	_g.playerManager = this;
+	this.hostRoom = host;
 }
 playerManager.prototype.addPlayer = function (socket, name){
-	if(this.players.length >= _g.maxPlayers){
-		socket.emit('error', 'too many players', _g.maxPlayers);
+	if(this.players.length >= this.hostRoom.maxPlayers){
+		socket.emit('error', 'too many players', this.hostRoom.maxPlayers);
 		socket.disconnect();
 		return 'maxplayers';
 	}
@@ -29,24 +25,18 @@ playerManager.prototype.addPlayer = function (socket, name){
 
 	this.players[this.players.length] = socket;
 
-	socket.broadcast.emit('user connected', name);
-
-	socket.emit('current state', {	playingStack: this.gameRules.playingStack,
-									pickingStackSize: this.gameRules.playingDeck.length, 
-									gameState: _g.gameState, 
-									players: this.getPlayerList(),
-									availableCommands: gameChat.getCommandList()	});
+	socket.broadcast.to(this.hostRoom.roomName).emit('user connected', name);
 
 	return 'ok';
 }
 
 playerManager.prototype.addAI = function(name) {
-	if(accountManager.getAccount(name)){
+	if(require('../accountManager').getAccount(name)){
 		return 'name';
 	}// bots may not take an already existing account name (which would prevent a player from connecting)
 
 	var bot = new baseBot();
-	bot.io = this.gameRules.io;
+	bot.io = this.hostRoom.io;
 	bot.isAi = true;
 	return this.addPlayer(bot, name);
 }
@@ -65,13 +55,15 @@ playerManager.prototype.removePlayer = function (socket){
 
 	for (var i = this.players.length - 1; i >= 0; i--) {
 		if(this.players[i].player.name == socket.player.name){
-			this.players.splice(i,1);
-
 			if(this.emptyHand(socket))
 				this.broadcastPickingDeckSize();
 
-			socket.broadcast.emit('user disconnected', socket.player.name);
-			_g.emit('player disconnect', socket);
+			this.players.splice(i,1);
+
+			this.hostRoom.sockets.emit('user disconnected', socket.player.name);
+			this.hostRoom.emit('player disconnect', socket);
+
+			socket.player = undefined;
 
 			return true;
 		}
@@ -92,27 +84,27 @@ playerManager.prototype.removeAI = function(name) {
 	return this.removePlayer(plr);
 };
 playerManager.prototype.emptyHand = function(socket) {
-	var b = this.gameRules.playingDeck.length;
+	var b = this.hostRoom.gameRules.playingDeck.length;
 	for (var i = socket.player.handCards.length - 1; i >= 0; i--) {
-		if(this.gameRules.playingDeck.length > 0)
-			this.gameRules.playingDeck.splice(0,0, socket.player.handCards[i]);
+		if(this.hostRoom.gameRules.playingDeck.length > 0)
+			this.hostRoom.gameRules.playingDeck.splice(0,0, socket.player.handCards[i]);
 	};
 	for (var i = socket.player.tappedCards.length - 1; i >= 0; i--) {
-		if(this.gameRules.playingDeck.length > 0)
-			this.gameRules.playingDeck.splice(0,0, socket.player.tappedCards[i]);
+		if(this.hostRoom.gameRules.playingDeck.length > 0)
+			this.hostRoom.gameRules.playingDeck.splice(0,0, socket.player.tappedCards[i]);
 	};
 	for (var i = socket.player.tableCards.length - 1; i >= 0; i--) {
-		if(this.gameRules.playingDeck.length > 0)
-			this.gameRules.playingDeck.splice(0,0, socket.player.tableCards[i]);
+		if(this.hostRoom.gameRules.playingDeck.length > 0)
+			this.hostRoom.gameRules.playingDeck.splice(0,0, socket.player.tableCards[i]);
 	};
 
-	this.gameRules.shuffleCards(this.gameRules.playingDeck);
+	this.hostRoom.gameRules.shuffleCards(this.hostRoom.gameRules.playingDeck);
 
-	return this.gameRules.playingDeck.length > b; // Did we add cards to the stack
+	return this.hostRoom.gameRules.playingDeck.length > b; // Did we add cards to the stack
 };
 playerManager.prototype.setPlayerReady = function (socket){
 	socket.player.ready = true;
-	this.gameRules.io.sockets.emit('player ready', socket.player.name);
+	this.hostRoom.sockets.emit('player ready', socket.player.name);
 	if(this.players.length > 1)
 	{
 		var start = true;
@@ -121,12 +113,12 @@ playerManager.prototype.setPlayerReady = function (socket){
 				start = false;
 		};
 		if(start)
-			this.gameRules.startGame();
+			this.hostRoom.gameRules.startGame();
 	}
 }
 playerManager.prototype.setPlayerUnready = function (socket){
 	socket.player.ready = false;
-	this.gameRules.io.sockets.emit('player unready', socket.player.name);
+	this.hostRoom.sockets.emit('player unready', socket.player.name);
 }
 playerManager.prototype.setAIReady = function(name) {
 	var plr = this.getPlayer(name);
@@ -148,7 +140,7 @@ playerManager.prototype.endGame = function () {
 	for (var i = this.players.length - 1; i >= 0; i--) {
 			this.players[i].player.ready = false;
 
-			this.players[i].broadcast.emit('player unready', this.players[i].player.name);
+			this.players[i].broadcast.to(this.hostRoom.roomName).emit('player unready', this.players[i].player.name);
 		};
 }
 playerManager.prototype.getPlayers = function () {
@@ -180,7 +172,7 @@ playerManager.prototype.broadcastPlayersTableSize = function () {
 	};	
 }
 playerManager.prototype.broadcastPlayerHandSize = function (player) {
-	player.broadcast.emit('playing hand size', {name: player.player.name, size: player.player.handCards.length});
+	player.broadcast.to(this.hostRoom.roomName).emit('playing hand size', {name: player.player.name, size: player.player.handCards.length});
 }
 playerManager.prototype.tappedCard = function (socket, card) {
 	if(socket.player.tappedCards.length >= 3)
@@ -188,7 +180,7 @@ playerManager.prototype.tappedCard = function (socket, card) {
 
 	socket.player.tappedCards[socket.player.tappedCards.length] = card;
 	for (var i = socket.player.handCards.length - 1; i >= 0; i--) {
-		if(this.gameRules.cardsEqual(socket.player.handCards[i], card))
+		if(this.hostRoom.gameRules.cardsEqual(socket.player.handCards[i], card))
 			socket.player.handCards.splice(i,1);
 	}
 	this.broadcastPlayerHandSize(socket);
@@ -203,20 +195,20 @@ playerManager.prototype.checkAllPlayerTapped = function () {
 			start = false
 	}
 	if(start)
-		this.gameRules.endTappingPhase();
+		this.hostRoom.gameRules.endTappingPhase();
 }
 
 playerManager.prototype.broadcastPickingDeckSize = function () {
-	this.gameRules.io.sockets.emit('picking deck size', this.gameRules.playingDeck.length);
+	this.hostRoom.sockets.emit('picking deck size', this.hostRoom.gameRules.playingDeck.length);
 }
 playerManager.prototype.broadcastPlayerTurn = function (id) {
-	this.gameRules.io.sockets.emit('player turn', this.players[id].player.name);
+	this.hostRoom.sockets.emit('player turn', this.players[id].player.name);
 }
 playerManager.prototype.broadcastNewStackCards = function (cards) {
-	this.gameRules.io.sockets.emit('cards played', cards);	
+	this.hostRoom.sockets.emit('cards played', cards);	
 }
 playerManager.prototype.broadcastCutStack = function () {
-	this.gameRules.io.sockets.emit('stack cut');
+	this.hostRoom.sockets.emit('stack cut');
 }
 playerManager.prototype.forEachAI = function(fct) {
 	for (var i = this.players.length - 1; i >= 0; i--) {
@@ -243,4 +235,9 @@ playerManager.prototype.playerWithCardsCount = function () {
 	};
 	return count;
 }
-module.exports = exports = new playerManager();
+playerManager.prototype.disconnectAllPlayers = function() {
+	for (var i = this.players.length - 1; i >= 0; i--) {
+		this.players[i].disconnect();
+	};
+};
+module.exports = exports = playerManager;

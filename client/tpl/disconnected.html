@@ -1,9 +1,10 @@
 <div class="title">Danish.JS</div>
 <div class="connexionBox">
 	<form>
-		<input type="text" ng-model="playerName" value="" autofocus\><br>
-		<input type="password" ng-model="password" value="" autofocus\><br>
+		<input type="text" class="form-control" ng-model="playerName" value="" autofocus\><br>
+		<input type="password" ng-model="password" class="form-control"  value="" autofocus\><br>
 		<input 	type="submit" 
+				class="btn btn-default"
 				value="Connect" 
 				ng-click="connect(playerName, password)" 
 				ng-disabled="connectionStatus == 'connecting'">
@@ -11,8 +12,8 @@
 </div>
 <div ng-controller="githubLog" class="ghLog">
 	Latest changes : <br>
-	<textarea scroll-glue disabled="disabled">{{ghlog}}</textarea>
+	<textarea class="form-control" scroll-glue disabled="disabled">{{ghlog}}</textarea>
 </div>
-<div class="footer">
+<footer class="footer navbar-fixed-bottom">
 	<p>Game created by Louis Geuten. Graciously hosted by Maxime Robaux. Source available on <a href="https://github.com/Orygin/danishcards">github</a></p>
-</div>
+</footer>

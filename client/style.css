@@ -2,7 +2,8 @@
 body
 {
 	font-family: 'Alegreya Sans SC', sans-serif;
-	font-weight: 400; 
+	font-weight: 400;
+	padding-bottom: 40px;
 }
 a{
 	color: #31A1B0 !important;
@@ -33,6 +34,8 @@ a:hover{
 }
 .logger
 {
+	width: 352px;
+	margin-right: 2px;
 	float:left;
 }
 .playerList
@@ -52,7 +55,7 @@ a:hover{
 {
 	width: 300px;
 	padding: 5px;
-	height: 100px;
+	height: 123px;
 	margin-top: 50px;
 	margin-right: auto;
 	margin-left: auto;
@@ -64,7 +67,7 @@ a:hover{
 .connexionBox input
 {
 	text-align: center;
-	margin: 2px 0px;
+	margin-bottom: -15px;
 }
 .ghLog
 {
@@ -103,18 +106,90 @@ a:hover{
     box-shadow: inset 0px 0px 35px 50px white;
 }
 .footer {
-   position:absolute;
-   bottom:0;
    width:100%;
    height:40px;
    background:#333;
    border-top: solid black 2px;
    box-shadow: inset 0px 7px 7px -7px black;
-   color: black;
+   color: #ABABAB;
    background-image:url('img/broken_noise.png'); /*Made by vincentklaiber.com*/
    text-shadow: 0 0 6px #4D4D4D;
 }
 .footer p{
 	text-align: center;
 	padding-top: 5px;
+}
+.loungePageContainer{
+	width: 655px;
+	margin-right: auto;
+	margin-left: auto;
+}
+.roomService{
+	width: 650px;
+	padding: 5px;
+	min-height: 500px;
+	max-height: 500px;
+	overflow: auto;
+	clear: both;
+	display: inline-block;
+}
+.createRoom{
+	opacity: 0;
+	width: 0px;
+	overflow: hidden;
+	min-height: 500px;
+	max-height: 500px;
+	display: inline-block;
+}
+.roomService, .room, .loungeButton, .createRoom{
+	margin-right: auto;
+	margin-left: auto;
+	border: 1px solid black;
+	box-shadow: 1px 1px 1px 1px;
+	text-align: center;
+	vertical-align: middle;
+}
+.room{
+	width: 640px;
+	min-height: 48px;
+	margin-bottom: 5px;
+	cursor: pointer;
+    position: relative;
+}
+.roomCheats{
+	border: 1px solid red;
+}
+.backgroundProgress{
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    background-color: #A9EEBF;
+    padding-left: 5px;
+    vertical-align: middle;
+    text-align: left;
+}
+.loungeButton {
+	width: 650px;
+	height: 25px;
+	margin-right: auto;
+	margin-left: auto;
+	cursor: pointer;
+	margin-top: 8px;
+}
+.createRoomEclipsed, .roomServiceEclipsed{
+	transition:all cubic-bezier(.64, 0,.6,.89) 0.4s;
+}
+.roomService.roomServiceEclipsed{
+	width: 0px;
+	padding: 0px;
+	overflow: hidden;
+	opacity: 0;
+}
+.createRoom.createRoomEclipsed{
+	opacity: 1;
+	width: 650px;
+	overflow: inherit;
+	padding: 5px;
 }
