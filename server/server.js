@@ -5,7 +5,7 @@ var express = require('express')
   , io = require('socket.io').listen(server)
   , accountManager = require('./accountManager')
   , makeSocket = require('./gameRoom/makeSocket')
-  , roomService = require('./roomService');
+  , roomService = require('./roomservice');
   
 accountManager.readFromFile();
 
