@@ -20,7 +20,7 @@ overlayIo.prototype.emit = function(name, data, ignore) {
 	});
 };
 
-function playRoom(name, io) {
+function playRoom(data, io, roomService) {
 	this.GAMESTATES = {
 		NOTPLAYING : {value: 0, name: "Not Playing"},
 		TAPPINGPHASE: {value: 1, name: "Tapping phase"},
@@ -28,10 +28,11 @@ function playRoom(name, io) {
 	};
 	this.emitSocket = false;
 
-	this.roomName = name;
-	this.cheats = false;
+	this.roomName = data.roomName;
+	this.cheats = data.cheats;
 	this.maxPlayers = 5;
 	this.gameState = this.GAMESTATES.NOTPLAYING;
+	this.rcon = 'sauce';
 
 	this.events = [];
 	this.io = new overlayIo(io, this);
@@ -42,6 +43,7 @@ function playRoom(name, io) {
 	this.voteSystem = new voteSystem(this);
 
 	this.on('player disconnect', function (socket) {
+		roomService.updateLounge();
 	});
 };
 playRoom.prototype.on = function(name, fct) {
@@ -67,11 +69,7 @@ playRoom.prototype.emit = function(name, data) {
 	for (var i = ev.length - 1; i >= 0; i--) {
 		ev[i].call(this, data);
 	};
-};
-
-playRoom.prototype.remove = function() {
-	this.playerManager.disconnectAllPlayers();
-};
+};	
 playRoom.prototype.getInfos = function() {
 	return {name: this.roomName, cheats: this.cheats, maxPlayers: this.maxPlayers, gameState: this.gameState, players: this.playerManager.players.length};
 };
@@ -79,12 +77,13 @@ playRoom.prototype.canJoin = function(socket) {
 	return this.playerManager.players.length < this.maxPlayers;
 };
 playRoom.prototype.playerJoin = function(socket) {
-	makeSocket.call(socket, this);
+	socket.hostRoom = this;
 	this.playerManager.addPlayer(socket, socket.playerName);
 	socket.emit('join room', this.roomName);
 	socket.join(this.roomName);
 };
 playRoom.prototype.playerLeave = function(socket) {
+	socket.hostRoom = undefined;
 	this.playerManager.removePlayer(socket);
 	socket.leave(this.roomName);
 };

@@ -4,19 +4,19 @@ function roomService() {
 	this.io = {};
 	this.accountManager = {};
 
-	this.rcon = 'sauce';
-
 	this.playingRooms = [];
+	this.loungePlayers = [];
 
 	this.roomDelay = 60*1000; // check every 60 seconds
 	setTimeout(this.think, this.roomDelay, this);
 };
 
-roomService.prototype.createRoom = function(roomName) {
-	if(this.getRoom(roomName) !== undefined)
+roomService.prototype.createRoom = function(data) {
+	if(this.getRoom(data.roomName) !== undefined)
 		return false;
 
-	this.playingRooms[roomName] = new room(roomName, this.io);
+	this.playingRooms[data.roomName] = new room(data, this.io, this);
+	this.updateLounge();
 
 	return true;
 };
@@ -31,11 +31,10 @@ roomService.prototype.think = function(self) {
 			continue;
 
 		if(ro.playerManager.getPlayers().length == 0){
-			ro.remove();
 			self.playingRooms[r] = undefined;
 		}
 	}
-
+	self.updateLounge();
 	setTimeout(self.think, self.roomDelay, self);
 };
 roomService.prototype.joinLounge = function(socket, name) {
@@ -43,6 +42,7 @@ roomService.prototype.joinLounge = function(socket, name) {
     ret.player = require('./accountManager').getAccount(name);
     ret.rooms = this.getRoomsInfos();
     socket.emit('join lounge', ret);
+    this.loungePlayers[this.loungePlayers.length] = socket;
 };
 roomService.prototype.getRoomsInfos = function() {
 	var ret = [], i = 0;
@@ -51,7 +51,7 @@ roomService.prototype.getRoomsInfos = function() {
 		var ro = this.playingRooms[r];
 		if(ro === undefined)
 			continue;
-		
+
 		ret[i] = ro.getInfos();
 		i++;
 	}
@@ -63,10 +63,18 @@ roomService.prototype.joinRoom = function(socket, name) {
 	if(room === undefined)
 		return false;
 
-	if(room.canJoin(socket))
-		return room.playerJoin(socket);
-	else
+	if(!room.canJoin(socket))
 		return false;
+
+	room.playerJoin(socket);
+
+	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
+		if(this.loungePlayers[i] === socket){
+			this.loungePlayers.splice(i,1);
+			break;
+		}
+	};
+	this.updateLounge();
 };
 roomService.prototype.leaveRoom = function(socket, name) {
 	var room = this.playingRooms[name];
@@ -77,5 +85,13 @@ roomService.prototype.leaveRoom = function(socket, name) {
 	room.playerLeave(socket);
 
 	this.joinLounge(socket, socket.name);
+	this.updateLounge();
+};
+roomService.prototype.updateLounge = function() {
+	var ret = this.getRoomsInfos();
+
+	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
+		this.loungePlayers[i].emit('update lounge', ret);
+	};
 };
 module.exports = new roomService();

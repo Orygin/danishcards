@@ -22,9 +22,13 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.connectionStatus = "disconnected";
 
 	$scope.connect = function (playerName, password) {
+		if(playerName === "" || playerName === undefined ||password === "" || password === undefined)
+			return $scope.addAlert('Can\t login with empty username or password', 'danger');;
+
 		var socket = io.connect('/');
 		$scope.socket = socket;
 		$scope.createSocketOn(socket);
+		$scope.socket.createdGameEvents = false;
 
 		$scope.playerName = playerName;
 		$scope.password = password;

@@ -28,7 +28,7 @@ function gameChat(host) {
 
 		if(arg[1] == this.hostRoom.rcon)
 		{
-			var acm = require('./accountManager');
+			var acm = require('../accountManager');
 			acm.getAccount(arg[0].player.name).rank = 'admin';
 			return {isCommand:true, message: 'given admin rights'};
 		}
@@ -94,7 +94,7 @@ function gameChat(host) {
 			return {isCommand:true, message: "Could not remove AI"};
 	});
 	this.on('/saveAccounts', 'Saves all accounts to file', ['admin'], function () {
-		var acc = require('./accountManager');
+		var acc = require('../accountManager');
 		acc.saveToFile();
 		return {isCommand:true, message: "Accounts saved"};
 	});
@@ -132,7 +132,7 @@ gameChat.prototype.parseCommand = function(socket, msg) {
 		var flag = this.commandCb[cmd].flags[i];
 		if(flag == 'admin')
 		{
-			var acm = require('./accountManager');
+			var acm = require('../accountManager');
 
 			if(!acm.isPlayerAdmin(socket.player.name))
 				return {isCommand:true, message: "You don't have admin rights"};

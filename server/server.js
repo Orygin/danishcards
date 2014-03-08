@@ -4,6 +4,7 @@ var express = require('express')
   , server = http.createServer(app)
   , io = require('socket.io').listen(server)
   , accountManager = require('./accountManager')
+  , makeSocket = require('./gameRoom/makeSocket')
   , roomService = require('./roomService');
   
 accountManager.readFromFile();
@@ -28,6 +29,8 @@ io.sockets.on('connection', function (socket) {
 
     socket.playerName = data.name;
     roomService.joinLounge(socket, data.name);
+
+    makeSocket.call(socket);
   });
   socket.on('join room', function (name) {
       roomService.joinRoom(socket, name);
@@ -35,9 +38,9 @@ io.sockets.on('connection', function (socket) {
   socket.on('leave room', function (name) {
       roomService.leaveRoom(socket, name);
   });
-  socket.on('create room', function (name) {
-      if(roomService.createRoom(name))
-        roomService.joinRoom(socket, name);
+  socket.on('create room', function (data) {
+      if(roomService.createRoom(data))
+        roomService.joinRoom(socket, data.roomName);
       else
         socket.emit('error', 'failed room creation');
   });

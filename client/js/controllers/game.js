@@ -24,6 +24,9 @@ function gameCtrl ($scope) {
 	$scope.chatHistoryPos = -1;
 	$scope.chatHistoryValue = "";
 
+	$scope.socket.removeAllListeners();
+	$scope.createSocketOn($scope.socket);
+
 		$scope.socket.on('current state', function (data) {
 			$scope.$apply(function () {
 				$scope.glog += 'Joined to room : ' + data.roomName + '\n';
@@ -106,9 +109,9 @@ function gameCtrl ($scope) {
 					if($scope.players[i].name == data.name)
 					{
 						$scope.players[i].tappedHand[$scope.players[i].tappedHand.length] = data.card;
+						$scope.glog += $scope.players[i].name + ' tapped card : ' + data.card.id + " of " + data.card.family + '\n';
 					}
 				};
-				$scope.glog += 'Tapped card : ' + data.card.id + " of " + data.card.family + '\n';
 			});
 		});
 		$scope.socket.on('playing hand size', function (data) {
@@ -252,7 +255,7 @@ function gameCtrl ($scope) {
 			});
 		});
 
-		$scope.socket.emit('get current state');
+	$scope.socket.emit('get current state');
 
 	$scope.nextAutoComplete = function(msg) {
 		var words = msg.split(" ");
@@ -584,7 +587,6 @@ function gameCtrl ($scope) {
 		}
 	};
 	$scope.leaveRoom = function() {
-		console.log('Leaving room');
 		$scope.socket.emit('leave room', $scope.roomName);
 	};
 };

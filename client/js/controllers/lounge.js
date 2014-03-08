@@ -1,15 +1,16 @@
 function loungeCtrl($scope) {
+	$scope.socket.on('update lounge', function (data) {
+		$scope.$apply(function () {
+			$scope.lounge.rooms = data;
+		});
+	});
 	$scope.joinRoom = function (name) {
 		$scope.socket.emit('join room', name);
 	};
-	$scope.clickCreateRoom = function () {
-		if(!$scope.ButtonActivated)
-			return $scope.ButtonActivated = true;
-		
-		if($scope.roomName === ""){
-			$scope.addAlert('Can\'t create a room with an empty name', 'warning');
-			return;
-		}
-		$scope.socket.emit('create room', $scope.roomName);
+	$scope.createRoom = function () {
+		if($scope.roomName === '' || $scope.roomName === undefined)	
+			return $scope.addAlert('Can\'t create room with empty name', 'warning');
+
+		$scope.socket.emit('create room', {roomName: $scope.roomName, cheats: $scope.cheats});
 	};
 };

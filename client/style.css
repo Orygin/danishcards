@@ -53,7 +53,7 @@ a:hover{
 {
 	width: 300px;
 	padding: 5px;
-	height: 100px;
+	height: 123px;
 	margin-top: 50px;
 	margin-right: auto;
 	margin-left: auto;
@@ -65,7 +65,7 @@ a:hover{
 .connexionBox input
 {
 	text-align: center;
-	margin: 2px 0px;
+	margin-bottom: -15px;
 }
 .ghLog
 {
@@ -117,16 +117,29 @@ a:hover{
 	text-align: center;
 	padding-top: 5px;
 }
+.loungePageContainer{
+	width: 655px;
+	margin-right: auto;
+	margin-left: auto;
+}
 .roomService{
 	width: 650px;
 	padding: 5px;
 	min-height: 500px;
 	max-height: 500px;
 	overflow: auto;
-	margin-top: 50px;
 	clear: both;
+	display: inline-block;
 }
-.roomService, .room, .loungeButton{
+.createRoom{
+	opacity: 0;
+	width: 0px;
+	overflow: hidden;
+	min-height: 500px;
+	max-height: 500px;
+	display: inline-block;
+}
+.roomService, .room, .loungeButton, .createRoom{
 	margin-right: auto;
 	margin-left: auto;
 	border: 1px solid black;
@@ -136,49 +149,45 @@ a:hover{
 }
 .room{
 	width: 640px;
+	min-height: 48px;
 	margin-bottom: 5px;
 	cursor: pointer;
+    position: relative;
 }
-.loungeButton, .loungeButtonActivated-remove.loungeButtonActivated-remove-active {
-	width: 628px;
-	margin-right: 12px;
-	height: 25px;
-	cursor: pointer;
-	display: inline-block;
+.roomCheats{
+	border: 1px solid red;
 }
-.createRoomButton{
+.backgroundProgress{
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    background-color: red;
+    padding-left: 5px;
+    vertical-align: middle;
+    text-align: left;
+}
+.loungeButton {
 	width: 650px;
-	max-height: 25px;
+	height: 25px;
 	margin-right: auto;
 	margin-left: auto;
-	margin-bottom: -40px;
-	margin-top: 25px;
+	cursor: pointer;
+	margin-top: 8px;
 }
-.createRoomButton input{
-	height: 0px;
-	width: 0px;
-	opacity: 0;
-}
-.loungeButton{
-	float: right;
-}
-.loungeButtonActivated{
+.createRoomEclipsed, .roomServiceEclipsed{
 	transition:all cubic-bezier(.64, 0,.6,.89) 0.4s;
 }
-.loungeInputActivated{
-	transition:all cubic-bezier(.64, 0,.6,.89) 0.5s;
+.roomService.roomServiceEclipsed{
+	width: 0px;
+	padding: 0px;
+	overflow: hidden;
+	opacity: 0;
 }
-.loungeButton.loungeButtonActivated{
-	width: 140px;
-	height: 25px;
-	margin-right: 6px;
-	cursor: pointer;
-	display: inline-block;
-}
-.loungeInputActivated.loungeInputActivated{
+.createRoom.createRoomEclipsed{
 	opacity: 1;
-	height: 24px;
-	width: 494px;
-	margin-left: 6px;
-	margin-top: 1px;
+	width: 650px;
+	overflow: inherit;
+	padding: 5px;
 }
