@@ -29,6 +29,7 @@ function playRoom(data, roomService) {
 	this.emitSocket = false;
 
 	this.roomName = data.roomName;
+	this.password = data.password;
 	this.cheats = data.cheats;
 	this.owner = data.owner;
 	this.maxPlayers = 5;
@@ -54,7 +55,7 @@ playRoom.prototype.on = function(name, fct) {
 
 	this.events[name][this.events[name].length] = fct;
 };
-playRoom.prototype.__defineGetter__('sockets', function () { // Screen to io
+playRoom.prototype.__defineGetter__('sockets', function () { // filter to io
 	this.emitSocket = true;
 	return this;
 });
@@ -73,9 +74,18 @@ playRoom.prototype.emit = function(name, data) {
 	};
 };	
 playRoom.prototype.getInfos = function() {
-	return {name: this.roomName, cheats: this.cheats, maxPlayers: this.maxPlayers, gameState: this.gameState, players: this.playerManager.players.length};
+	return {name: this.roomName,
+			public: (this.password === undefined),
+			owner: this.owner,
+			cheats: this.cheats,
+			maxPlayers: this.maxPlayers,
+			gameState: this.gameState,
+			players: this.playerManager.players.length};
 };
-playRoom.prototype.canJoin = function(socket) {
+playRoom.prototype.canJoin = function(socket, pass) {
+	if(this.password !== '' && this.password !== undefined && this.password !== pass)
+		return false;
+
 	return this.playerManager.players.length < this.maxPlayers;
 };
 playRoom.prototype.playerJoin = function(socket) {

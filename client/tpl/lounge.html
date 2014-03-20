@@ -2,8 +2,8 @@
 	<div class="title">Lounge</div>
 	<div class="loungePageContainer">
 		<div class="roomService" ng-class="{roomServiceEclipsed: RoomCreation}">
-			<div class="room" ng-repeat="room in lounge.rooms" ng-click="joinRoom(room.name)" ng-class="{roomCheats: room.cheats}">
-				
+			<div class="room" ng-repeat="room in lounge.rooms" ng-click="joinRoom(room)" ng-class="{roomCheats: room.cheats, privateRoom: !room.public}">
+				{{room.public}}
 				{{room.name}}<br>{{room.gameState.name}}
 				<div class="backgroundProgress" ng-style="{width: (room.players/room.maxPlayers)*100+'%'}">{{room.players}}/{{room.maxPlayers}}</div>
 			</div>
@@ -16,6 +16,13 @@
 		    </div>
 		  </div>
 		  <div class="form-group">
+		    <label for="inputRoom3" class="col-sm-2 control-label" >Password</label>
+		    <div class="col-sm-10">
+		      <input type="text" class="form-control" id="inputRoom3" ng-model="roomPassword"
+		      		 popover="Leave empty to make a public room" popover-placement="top" popover-trigger="focus">
+		    </div>
+		  </div>
+		  <div class="form-group">
 		    <div class="col-sm-offset-2 col-sm-10">
 		      <div class="checkbox">
 		        <label>
@@ -25,12 +32,31 @@
 		    </div>
 		  </div>
 			<div class="form-group">
-				<button type="submit" class="btn btn-default" ng-click="createRoom()">Create room</button>
+				<button type="submit" class="btn btn-primary btn-sm" ng-click="createRoom()">Create room</button>
 			</div>
 		</div>
 	</div>
-	<div class="loungeButton roomButton" ng-init="RoomCreation = false" ng-click="RoomCreation = !RoomCreation">{{RoomCreation ? 'Back' : 'Create room'}}</div>
+	<div 	class="loungeButton" 
+			ng-init="RoomCreation = false" 
+			ng-click="RoomCreation = !RoomCreation">{{RoomCreation ? 'Back' : 'Create room'}}</div>
 	<footer class="footer navbar-fixed-bottom">
 		<p>Game created by Louis Geuten. Graciously hosted by Maxime Robaux. Source available on <a href="https://github.com/Orygin/danishcards">github</a></p>
 	</footer>
+	<script type="text/ng-template" id="passwordContent.html">
+        <div class="modal-header">
+            <h3>Room is protected with a password!</h3>
+        </div>
+        <div class="modal-body">
+			<div class="form-group">
+				<label for="inputRoom3" class="col-sm-2 control-label">Password</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" id="inputRoom3" ng-model="password">
+				</div>
+			</div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+            <button class="btn btn-primary" ng-click="ok(password)">Connect</button>
+        </div>
+    </script>
 </div>

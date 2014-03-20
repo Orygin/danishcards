@@ -32,15 +32,15 @@ io.sockets.on('connection', function (socket) {
 
     makeSocket.call(socket);
   });
-  socket.on('join room', function (name) {
-      roomService.joinRoom(socket, name);
+  socket.on('join room', function (data) {
+      roomService.joinRoom(socket, data.roomName, data.password);
   });
   socket.on('leave room', function (name) {
       roomService.leaveRoom(socket, name);
   });
   socket.on('create room', function (data) {
       if(roomService.createRoom(data))
-        roomService.joinRoom(socket, data.roomName);
+        roomService.joinRoom(socket, data.roomName, data.password);
       else
         socket.emit('error', 'failed room creation');
   });

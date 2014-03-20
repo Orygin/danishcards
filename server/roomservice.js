@@ -57,14 +57,18 @@ roomService.prototype.getRoomsInfos = function() {
 	}
 	return ret;
 };
-roomService.prototype.joinRoom = function(socket, name) {
+roomService.prototype.joinRoom = function(socket, name, pass) {
 	var room = this.playingRooms[name];
 
-	if(room === undefined)
+	if(room === undefined){
+		socket.emit('error', 'fail join room exist');
 		return false;
+	}
 
-	if(!room.canJoin(socket))
+	if(!room.canJoin(socket, pass)){
+		socket.emit('error', 'fail join room password');
 		return false;
+	}
 
 	room.playerJoin(socket);
 

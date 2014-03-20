@@ -127,7 +127,7 @@ a:hover{
 .roomService{
 	width: 650px;
 	padding: 5px;
-	min-height: 500px;
+	min-height: 300px;
 	max-height: 500px;
 	overflow: auto;
 	clear: both;
@@ -137,7 +137,7 @@ a:hover{
 	opacity: 0;
 	width: 0px;
 	overflow: hidden;
-	min-height: 500px;
+	min-height: 300px;
 	max-height: 500px;
 	display: inline-block;
 }
@@ -158,6 +158,9 @@ a:hover{
 }
 .roomCheats{
 	border: 1px solid red;
+}
+.privateRoom .backgroundProgress{
+	background-color: #EEA9BF;
 }
 .backgroundProgress{
     height: 100%;

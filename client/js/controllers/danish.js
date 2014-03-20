@@ -62,6 +62,12 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		        else if(name == 'failed room creation'){
 					$scope.addAlert('Could not create room!', 'warning');
 		        }
+		        else if(name === 'fail join room password'){
+		        	$scope.addAlert('Could not join room: invalid password!', 'warning');
+		        }
+		        else if (name === 'fail join room exist'){
+		        	$scope.addAlert('Could not join room: room doesn\'t exists!', 'warning');
+		        }
       		});
 		});
 		socket.on('disconnect', function () {
