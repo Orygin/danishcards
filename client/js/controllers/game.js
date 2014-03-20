@@ -1,4 +1,5 @@
 function gameCtrl ($scope) {
+	$scope.setFooter('<p><span ng-click="leaveRoom()" style="cursor:pointer">Leave room</span></p>');
 	$scope.roomName = "";
 
 	$scope.players = [];

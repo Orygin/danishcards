@@ -36,11 +36,4 @@
 	<img ng-repeat="i in getNumber(tableHand) track by $index" src="img/cards/b1fv.png" ng-click="tableCardClick($index)"/>
 
 	<a href="#" ng-click="takeStack()" ng-show="canTakeStack()">Take stack</a> - <a href="#" ng-click="playSelected()">Play card(s)</a>
-
-	<div ng-include="'tpl/soundTpl.html'"></div>
-	<footer class="footer navbar-fixed-bottom">
-		<p>Room '{{roomName}}' - 
-			<span ng-click="leaveRoom()" style="cursor:pointer">Leave room</span>
-		</p>
-	</footer>
 </div>

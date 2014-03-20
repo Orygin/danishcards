@@ -1,4 +1,5 @@
 function loungeCtrl($scope, $modal) {
+	$scope.setFooter('Game created by Louis Geuten. Graciously hosted by Maxime Robaux. Source available on <a href="https://github.com/Orygin/danishcards">github</a>');
 	$scope.socket.on('update lounge', function (data) {
 		$scope.$apply(function () {
 			$scope.lounge.rooms = data;

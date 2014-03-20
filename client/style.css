@@ -114,8 +114,6 @@ a:hover{
    color: #ABABAB;
    background-image:url('img/broken_noise.png'); /*Made by vincentklaiber.com*/
    text-shadow: 0 0 6px #4D4D4D;
-}
-.footer p{
 	text-align: center;
 	padding-top: 5px;
 }

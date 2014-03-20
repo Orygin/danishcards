@@ -7,6 +7,7 @@
 		<link rel="shortcut icon" href="favicon.ico" />
 
 		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular-sanitize.min.js"></script>
     	<script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.10.0.min.js"></script>
 		<script src="https://raw.github.com/tbosch/autofill-event/master/src/autofill-event.js"></script>
     	<script src="/socket.io/socket.io.js"></script>
@@ -27,6 +28,10 @@
 		<div ng-controller="Main">
   			<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
   			<div ng-include="getTemplateForStatus()"></div>
+  			<footer class="footer navbar-fixed-bottom">
+  				<span ng-bind-html="footerData"></span>
+  				<div ng-include="'tpl/soundTpl.html'" style="float:right"></div>
+			</footer>
 		</div>
 	</body>
 </html>
