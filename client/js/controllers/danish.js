@@ -19,6 +19,16 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			return 'tpl/disconnected.html';
 	};
 
+	$scope.setLastRoomName = function(name) {
+		$scope.lastRoomName = name;
+	};
+	$scope.playSound = function(name) {
+		$scope.$broadcast("play sound", name);
+	};
+	$scope.leaveRoom = function() {
+		$scope.socket.emit('leave room', $scope.lastRoomName);
+	};
+
 	$scope.connectionStatus = "disconnected";
 	$scope.footerData = 'Game created by Louis Geuten. Graciously hosted by Maxime Robaux. Source available on <a href="https://github.com/Orygin/danishcards">github</a>';
 
@@ -74,8 +84,6 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		socket.on('disconnect', function () {
 			$scope.connectionStatus = "disconnected";
 			$scope.addAlert('You have been disconnected', 'danger');
-			console.dir(socket);
-			console.dir(io);
 
 			socket.removeAllListeners();
 		});
@@ -129,29 +137,29 @@ app.controller('Sound', function ($scope){
 	$scope.toggleMute = function () {
 		$scope.muted = !$scope.muted;
 	}
+	$scope.$on('play sound', function(e, snd) {
+		if($scope.muted)
+			return;
 
-	$scope.$on('connected', function(){
-		if(!$scope.muted)
-			$scope.connectSound.play();
-	});
-	$scope.$on('selfTurn', function () {
-		if(!$scope.muted)
-			$scope.selfTurnSound.play();
-	});
-	$scope.$on('playerTurn', function(){
-		if(!$scope.muted)
-			$scope.playerTurnSound.play();
-	});
-	$scope.$on('stackCut', function(){
-		if(!$scope.muted)
-			$scope.stackCutSound.play();
-	});
-	$scope.$on('plsrdy', function(){
-		if(!$scope.muted)
-			$scope.plsRdy.play();
-	});
-	$scope.$on('mention', function() {
-		if(!$scope.muted)
-			$scope.mentionSound.play();
+		switch(snd){
+			case "connected":
+				$scope.connectSound.play();
+				break;
+			case "selfTurn":
+				$scope.selfTurnSound.play();
+				break;
+			case "playerTurn":
+				$scope.playerTurnSound.play();
+				break;
+			case "stackCut":
+				$scope.stackCutSound.play();
+				break;
+			case "plsrdy":
+				$scope.plsRdy.play();
+				break;
+			case "mention":
+				$scope.mentionSound.play();
+				break;
+		}
 	});
 });

@@ -1,6 +1,5 @@
 function gameCtrl ($scope) {
-	$scope.setFooter('<p><span ng-click="leaveRoom()" style="cursor:pointer">Leave room</span></p>');
-	$scope.roomName = "";
+	$scope.setLastRoomName("");
 
 	$scope.players = [];
 	$scope.pickingStackSize = 52;
@@ -32,7 +31,7 @@ function gameCtrl ($scope) {
 			$scope.$apply(function () {
 				$scope.glog += 'Joined to room : ' + data.roomName + '\n';
 
-				$scope.roomName = data.roomName;
+				$scope.setLastRoomName(data.roomName);
 				$scope.players = data.players;
 				$scope.gameState = data.gameState;
 				$scope.pickingStackSize = data.pickingStackSize;
@@ -63,7 +62,7 @@ function gameCtrl ($scope) {
 			$scope.$apply(function () {
 				$scope.players[$scope.players.length] = {name:pName, ready: false, tableHand: 0, tappedHand: [], playingHand: 0};
 				$scope.glog += 'User connected : ' + pName + '\n';
-				$scope.$broadcast('connected');
+				$scope.playSound('connected');
 			});
 		});
 		$scope.socket.on('user disconnected', function (pName) {
@@ -135,9 +134,9 @@ function gameCtrl ($scope) {
 				$scope.playerTurn = plr;
 				$scope.glog += 'Player turn : ' + plr +'\n';
 				if(plr == $scope.playerName)
-					$scope.$broadcast('selfTurn');
+					$scope.playSound('selfTurn');
 				else
-					$scope.$broadcast('playerTurn');
+					$scope.playSound('playerTurn');
 			})
 		});
 		$scope.socket.on('draw card', function (card) {
@@ -199,7 +198,7 @@ function gameCtrl ($scope) {
 			$scope.$apply(function () {
 				$scope.glog += 'Stack cut : ' + $scope.playingStack.length + '\n';
 				$scope.playingStack = [];
-				$scope.$broadcast('stackCut');
+				$scope.playSound('stackCut');
 			});
 		});
 		$scope.socket.on('select ace target', function () {
@@ -241,7 +240,7 @@ function gameCtrl ($scope) {
 				var words = data.message.split(' ');
 				for (var i = words.length - 1; i >= 0; i--) {
 					if(words[i] == $scope.playerName)
-						$scope.$broadcast('mention');
+						$scope.playSound('mention');
 				};
 			});
 		});
@@ -252,7 +251,7 @@ function gameCtrl ($scope) {
 		});
 		$scope.socket.on('play sound rdy', function () {
 			$scope.$apply(function() {
-				$scope.$broadcast('plsrdy');
+				$scope.playSound('plsrdy');
 			});
 		});
 
@@ -586,9 +585,6 @@ function gameCtrl ($scope) {
 			$scope.socket.emit('set ready');
 			$scope.ready = true;
 		}
-	};
-	$scope.leaveRoom = function() {
-		$scope.socket.emit('leave room', $scope.roomName);
 	};
 };
 function sortCards (c1,c2) {

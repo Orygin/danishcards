@@ -1,12 +1,12 @@
-var express = require('express')
-  , app = express()
-  , http = require('http')
-  , server = http.createServer(app)
-  , io = require('socket.io').listen(server)
-  , accountManager = require('./accountManager')
-  , makeSocket = require('./gameRoom/makeSocket')
-  , roomService = require('./roomservice');
-  
+var express = require('express'),
+    app = express(),
+    http = require('http'),
+    server = http.createServer(app),
+    io = require('socket.io').listen(server),
+    accountManager = require('./accountManager'),
+    makeSocket = require('./gameRoom/makeSocket'),
+    roomService = require('./roomservice');
+
 accountManager.readFromFile();
 
 roomService.io = io;
@@ -15,7 +15,7 @@ roomService.accountManager = accountManager;
 process.env.PWD = process.cwd()
 
 app.use(express.compress());
-app.use(express.static(process.env.PWD+'/client/'));
+app.use(express.static(process.env.PWD + '/client/'));
 
 //app.use(express.logger());
 io.set('log level', 1);

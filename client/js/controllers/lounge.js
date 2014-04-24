@@ -1,5 +1,5 @@
 function loungeCtrl($scope, $modal) {
-	$scope.setFooter('Game created by Louis Geuten. Graciously hosted by Maxime Robaux. Source available on <a href="https://github.com/Orygin/danishcards">github</a>');
+	$scope.room = {};
 	$scope.socket.on('update lounge', function (data) {
 		$scope.$apply(function () {
 			$scope.lounge.rooms = data;
@@ -18,7 +18,7 @@ function loungeCtrl($scope, $modal) {
 		$scope.socket.emit('create room', {	roomName: $scope.roomName,
 											cheats: $scope.cheats,
 											owner: $scope.playerName,
-											password: $scope.roomPassword});
+											password: $scope.room.password});
 	};
 	$scope.createModalPassword = function(room) {
 		var modalInstance = $modal.open({
