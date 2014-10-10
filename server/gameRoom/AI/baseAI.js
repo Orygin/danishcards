@@ -21,7 +21,8 @@ module.exports = function AI () {
 
 // The client has to handle these functions accordingly,
 // While we use the values from the server directly
-// So these are events but the data is already changed
+// So these are events but our object already reflect the changes
+// Only add AI logic code
 	this.on('new playing hand', function (cards) {
 	});
 

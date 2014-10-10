@@ -162,7 +162,8 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 
 		if(actualCard.id == 8 && !cutByFour){
 			for (var i = cards.length - 1; i >= 0; i--) {
-				if(this.hostRoom.playerManager.players[this.playerTurn].player.name == socket.player.name) // we don't skip our turn, so we skip a turn more
+				// we don't skip our turn, so we skip a turn more
+				if(this.hostRoom.playerManager.players[this.playerTurn].player.name == socket.player.name)
 					this.nextPlayerTurn();
 						
 				this.nextPlayerTurn();
@@ -191,7 +192,7 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 			};
 		};
 
-		socket.emit('take stack', this.playingStack); // and make him take back the whole stack
+		socket.emit('take stack', this.playingStack); // and take back the whole stack
 
 		for (var i = this.playingStack.length - 1; i >= 0; i--) {
 			socket.player.handCards[socket.player.handCards.length] = this.playingStack[i];
@@ -268,7 +269,7 @@ danishGameRules.prototype.drawCard = function (player) {
 				card = card2;
 				i = this.playingDeck.length-j;
 			}
-			else if(card2.id > card.id && !(card.id == 2 || card.id == 3 || card.id == 10)){
+			else if(card2.id > card.id){
 				card = card2;
 				i = this.playingDeck.length-j;
 			}
@@ -330,7 +331,7 @@ danishGameRules.prototype.checkEndGame = function () {
 		}
 	};	
 	if(playerWithCards <= 1)
-	this.endGame();
+		this.endGame();
 }
 danishGameRules.prototype.endGame = function () {
 	if(this.hostRoom.gameState.value == 0)
