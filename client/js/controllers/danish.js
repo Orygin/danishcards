@@ -26,7 +26,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		$scope.$broadcast("play sound", name);
 	};
 	$scope.leaveRoom = function() {
-		$scope.socket.emit('leave room', $scope.lastRoomName);
+		$scope.$broadcast("leaveRoom");
 	};
 
 	$scope.connectionStatus = "disconnected";

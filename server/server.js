@@ -18,14 +18,13 @@ app.use(express.compress());
 app.use(express.static(process.env.PWD + '/client/'));
 
 //app.use(express.logger());
-io.set('log level', 1);
-
+  
 server.listen(Number(process.env.PORT || 80));
 
 io.sockets.on('connection', function (socket) {
   socket.on('activate', function (data) {
     if(!accountManager.connect(data.name, data.pw))
-      socket.emit('error', 'failed login');
+      socket.emit('fail', 'failed login');
 
     socket.playerName = data.name;
     roomService.joinLounge(socket, data.name);
@@ -42,7 +41,7 @@ io.sockets.on('connection', function (socket) {
       if(roomService.createRoom(data))
         roomService.joinRoom(socket, data.roomName, data.password);
       else
-        socket.emit('error', 'failed room creation');
+        socket.emit('fail', 'failed room creation');
   });
 });
 

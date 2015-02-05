@@ -81,6 +81,10 @@ function gameChat(host) {
 		else
 			return {isCommand:true, message: "Could not set AI ready"};
 	});
+	this.on('/setAllAIRdy', 'Sets all bot ready',  ['owner'], function (arg) {
+		if(this.hostRoom.playerManager.setAllAIReady())
+			return {isCommand:true, message: "AI set ready"};
+	});
 	this.on('/setAIUnRdy', 'Sets a bot unready',  ['owner'], function (arg) {
 		if(this.hostRoom.playerManager.setAIUnready(arg[1]))
 			return {isCommand:true, message: "AI set unready"};

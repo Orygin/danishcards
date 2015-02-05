@@ -75,7 +75,7 @@ playRoom.prototype.emit = function(name, data) {
 };	
 playRoom.prototype.getInfos = function() {
 	return {name: this.roomName,
-			public: (this.password === undefined),
+			public: (this.password === undefined || this.password == ""),
 			owner: this.owner,
 			cheats: this.cheats,
 			maxPlayers: this.maxPlayers,

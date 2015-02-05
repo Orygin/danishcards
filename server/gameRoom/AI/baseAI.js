@@ -1,17 +1,16 @@
-var basePlayer = require('../player'),
-	playerHelper = require('./playerHelper'),
-	chat = require('../chat'),
+var playerHelper = require('./playerHelper'),
 	makeSocket = require('../makeSocket'),
 	fakeSocket = require('./fakeSocket');
 
-module.exports = function AI () {
+module.exports = function AI (hostRoom) {
 	this.gameRules = require('../danishGameRules');
 	this.playerManager = require('../playerManager');
 
-	this.playerHelper = new playerHelper(this);
+	this.hostRoom = hostRoom;
+	this.playerHelper = new playerHelper(this, hostRoom);
 	this.player = {};
 	this.io = {};
-	
+
 	this.socketCallbacks = [];
 	this.emitBroadcast = false;
 
@@ -60,9 +59,9 @@ module.exports = function AI () {
 	});
 
 	this.on('current state', function (state) { // called when the player object was created upon us
-		this.player.isAI = true;
-		makeSocket.call(this.socket);
 		this.onCreate(state);
+	});
+	this.on('game end', function () {
 	});
 }
 
@@ -90,3 +89,7 @@ module.exports.prototype.emit = function(name, data) {
 module.exports.prototype.disconnect = function() {
 	
 };
+module.exports.prototype.activate = function () {
+	makeSocket.call(this.socket);
+	this.socket.emit('get current state');
+}

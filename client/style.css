@@ -119,6 +119,7 @@ a:hover{
 }
 .loungePageContainer{
 	width: 655px;
+	max-height: 300px;
 	margin-right: auto;
 	margin-left: auto;
 }
@@ -132,11 +133,11 @@ a:hover{
 	display: inline-block;
 }
 .createRoom{
-	opacity: 0;
-	width: 0px;
-	overflow: hidden;
+	width: 650px;
+	padding: 5px;
 	min-height: 300px;
 	max-height: 500px;
+	overflow: auto;
 	display: inline-block;
 }
 .roomService, .room, .loungeButton, .createRoom{
@@ -178,19 +179,4 @@ a:hover{
 	margin-left: auto;
 	cursor: pointer;
 	margin-top: 8px;
-}
-.createRoomEclipsed, .roomServiceEclipsed{
-	transition:all cubic-bezier(.64, 0,.6,.89) 0.4s;
-}
-.roomService.roomServiceEclipsed{
-	width: 0px;
-	padding: 0px;
-	overflow: hidden;
-	opacity: 0;
-}
-.createRoom.createRoomEclipsed{
-	opacity: 1;
-	width: 650px;
-	overflow: inherit;
-	padding: 5px;
 }

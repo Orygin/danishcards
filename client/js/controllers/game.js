@@ -24,6 +24,10 @@ function gameCtrl ($scope) {
 	$scope.chatHistoryPos = -1;
 	$scope.chatHistoryValue = "";
 
+	$scope.$on('leaveRoom', function(){
+		$scope.socket.emit('leave room', $scope.lastRoomName);
+	});
+
 	$scope.socket.removeAllListeners();
 	$scope.createSocketOn($scope.socket);
 
@@ -218,7 +222,7 @@ function gameCtrl ($scope) {
 				$scope.glog += 'Begining round : play smallest card\n';
 			});
 		});
-		$scope.socket.on('gameEnd', function () {
+		$scope.socket.on('game end', function () {
 			$scope.$apply(function () {
 				for (var i = $scope.players.length - 1; i >= 0; i--) {
 					$scope.players[i].tappedHand = [];

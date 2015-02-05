@@ -3,8 +3,8 @@ var baseAI 	= require('./baseAI');
 oryginAI.prototype = baseAI.prototype;
 oryginAI.prototype.constructor = oryginAI;
 
-function oryginAI() {
-	baseAI.call(this);
+function oryginAI(hostRoom) {
+	baseAI.call(this, hostRoom);
 
 	this.onCreate = function (state) {
 		if(state.gameState == this.hostRoom.GAMESTATES.NOTPLAYING)
@@ -14,25 +14,30 @@ function oryginAI() {
 // The client has to handle these functions accordingly,
 // While we use the values from the server directly
 // So these are events but our object already reflect the changes
-// Only add AI logic code
+// Only add AI logic code below
 	this.on('new game state', function(state) {
-
+		if(state == this.hostRoom.GAMESTATES.NOTPLAYING)
+			this.socket.emit('set ready');
 	});
 	this.on('new playing hand', function (cards) {
 		//get our best cards and tap them
 		var sorting = { "id": 4 };
-		while(best.length < 3){
+		var best = 0;
+		while(best < 3){
 			for (var i = this.player.handCards.length - 1; i >= 0; i--) {
 				var card = this.player.handCards[i];
 				if(card.id == 2 || card.id == 3 || card.id == 10){
-					this.emit('set tapped card', card);
+					this.socket.emit('set tapped card', card);
+					best += 1;
 				}
 				else if(card.id > sorting.id){
 					sorting = card;
 				}
 			};
-			if(best.length < 3)
-				this.emit('set tapped card', card);
+			if(best < 3){
+				this.socket.emit('set tapped card', card);
+				best += 1;
+			}
 		}
 	});
 
@@ -46,12 +51,13 @@ function oryginAI() {
 	});
 
 	this.on('player turn', function (playerName) {
-		if(playerName == this.player.name)
+		if(playerName == this.player.name){
 			this.play();
+		}
 	});
 
 	this.on('force play smallest', function () {
-		this.gameRules.playCards(this, [this.player.getSmallestCard()]);
+		this.socket.emit('play cards', [this.player.getSmallestCard()]);
 	});
 
 	this.on('cards played', function (cards) {
@@ -80,7 +86,7 @@ function oryginAI() {
 					i = list.length;
 
 				var pl = list[i-1];
-				while(!pl.hasCards()){ //Get a player with cards that plays just before us
+				while(!this.playerHelper.playerHasCards(pl)){ //Get a player with cards that plays just before us
 					i--;
 
 					if(i == 0)
@@ -89,13 +95,19 @@ function oryginAI() {
 					var pl = list[i-1];
 				}
 
-				this.emit('ace target', pl.name);
+				this.socket.emit('ace target', pl.name);
 				break;
 			}
 		};
 	});
+	this.on('game end', function () {
+	});
 
 	this.play = function () {
+		if(this.player.forcePlaySmallest){
+			return; // Card will be played in the 'force play smallest' event
+		}
+
 		//it's our turn to play
 		if(!this.player.hasCards())
 			return;
@@ -106,17 +118,17 @@ function oryginAI() {
 		}
 		else if (this.player.handCards.length == 0){
 			//We must play a table card, doesn't matter which one
-			this.emit('play table card', this.player.tableCards.length);
+			return this.socket.emit('play table card', 0);
 		}
 
 		for (var i = source.length - 1; i >= 0; i--) {
-			if(this.gameRules.canPlayCard(source[i], this)){
-				return this.emit('play card', source[i]);
+			if(this.hostRoom.gameRules.canPlayCard(source[i], this)){
+				return this.socket.emit('play cards', [source[i]]);
 			}
 		};
 		// No cards available
-		this.emit('gib stack');
-		this.emit('send chat', 'gimme that stack yo\'');
+		this.socket.emit('gibe stack');
+		this.socket.emit('send chat', 'gimme that stack yo\'');
 	}
 }
 

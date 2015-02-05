@@ -73,9 +73,9 @@ danishGameRules.prototype.endTappingPhase = function () {
 				{
 					this.playerTurn = i;
 					this.hostRoom.sockets.emit('new game state', {value: 2, name: "Player turn"});
-					this.hostRoom.playerManager.broadcastPlayerTurn(this.playerTurn);
-					this.hostRoom.playerManager.players[i].emit('force play smallest');
 					this.hostRoom.playerManager.players[i].player.forcePlaySmallest = true;
+					this.hostRoom.playerManager.players[i].emit('force play smallest');
+					this.hostRoom.playerManager.broadcastPlayerTurn(this.playerTurn);
 					return;
 				}
 			};
@@ -90,7 +90,7 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 	if(this.canPlayCard(cards[0], socket) && this.hostRoom.playerManager.players[this.playerTurn].player.name == socket.player.name) //it's our turn and we can play this card
 	{
 		if(socket.player.forcePlaySmallest)
-				socket.player.forcePlaySmallest = false;
+			socket.player.forcePlaySmallest = false;
 
 		for (var i = cards.length - 1; i >= 0; i--) {
 			this.playingStack[this.playingStack.length] = cards[i];
@@ -99,7 +99,7 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 		var source = socket.player.handCards;
 		if(socket.player.handCards.length == 0 && socket.player.tappedCards.length > 0){
 			source = socket.player.tappedCards;
-			socket.broadcast.to(this.hostRoom.roomName).emit('play tapped cards', {name: socket.player.name, cards: cards});
+			this.hostRoom.sockets.emit('play tapped cards', {name: socket.player.name, cards: cards});
 		}
 
 		for (var i = source.length - 1; i >= 0; i--) {
@@ -143,8 +143,8 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 		{
 			if(this.hostRoom.playerManager.players.length > 2)
 				socket.emit('select ace target');
-			else
-				this.nextPlayerTurn();	
+			else // When playing 1v1, ace always targets the other player.
+				this.nextPlayerTurn(true);	
 
 			this.hostRoom.playerManager.broadcastPlayerHandSize(socket);
 			this.checkEndGame();
@@ -155,23 +155,30 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 			this.playingStack = [];
 			this.hostRoom.playerManager.broadcastCutStack();
 			if(!this.hostRoom.playerManager.players[this.playerTurn].player.hasCards())
-				this.nextPlayerTurn();
+				this.nextPlayerTurn(true);
+			else
+				this.hostRoom.playerManager.broadcastPlayerTurn(this.playerTurn);
 		}
 		else
-			this.nextPlayerTurn();
+			this.nextPlayerTurn(false);
 
 		if(actualCard.id == 8 && !cutByFour){
 			for (var i = cards.length - 1; i >= 0; i--) {
 				// we don't skip our turn, so we skip a turn more
-				if(this.hostRoom.playerManager.players[this.playerTurn].player.name == socket.player.name)
-					this.nextPlayerTurn();
+
+				if(this.hostRoom.playerManager.players[this.playerTurn].player.name == socket.player.name){
+					this.nextPlayerTurn(false);
+				}
 						
-				this.nextPlayerTurn();
+				this.nextPlayerTurn(false);
 			};
 		}
 
 		this.hostRoom.playerManager.broadcastPlayerHandSize(socket);
-		this.checkEndGame();
+
+		if(!this.checkEndGame())
+			this.flushPlayerTurns();
+
 		return true;
 	}
 	else if(!this.canPlayCard(cards[0], socket) && socket.player.handCards.length == 0 && socket.player.tappedCards.length > 0 && this.hostRoom.playerManager.players[this.playerTurn].player.name == socket.player.name)
@@ -202,7 +209,7 @@ danishGameRules.prototype.playCards = function (socket, cards) {
 		this.playingStack = [];
 		this.hostRoom.sockets.emit('stack taken', socket.player.name);
 		this.hostRoom.playerManager.broadcastCutStack();
-		this.nextPlayerTurn();
+		this.nextPlayerTurn(true);
 		this.checkEndGame();
 		return false;
 	}
@@ -243,14 +250,18 @@ danishGameRules.prototype.canPlayCard = function (card, socket) {
 	else
 		return false;
 }
-danishGameRules.prototype.nextPlayerTurn = function () {
+danishGameRules.prototype.nextPlayerTurn = function (flush) {
 	this.playerTurn += 1;
 	if(this.playerTurn >= this.hostRoom.playerManager.players.length)
 		this.playerTurn = 0;
 
 	if(this.hostRoom.playerManager.playerWithCardsCount() > 1 && !this.hostRoom.playerManager.players[this.playerTurn].player.hasCards())
-		return this.nextPlayerTurn(); // don't broadcast it if we skip a player
+		this.nextPlayerTurn(flush); //Players with no cards don't play
 
+	if(flush)
+		this.flushPlayerTurns();
+}
+danishGameRules.prototype.flushPlayerTurns = function () {
 	this.hostRoom.playerManager.broadcastPlayerTurn(this.playerTurn);
 }
 danishGameRules.prototype.drawCard = function (player) {
@@ -296,7 +307,7 @@ danishGameRules.prototype.playerTakeStack = function (player) {
 	this.playingStack = [];
 	this.hostRoom.sockets.emit('stack taken', player.player.name);
 	this.hostRoom.playerManager.broadcastCutStack();
-	this.nextPlayerTurn();
+	this.nextPlayerTurn(true);
 }
 danishGameRules.prototype.playTableCard = function (player, id) {
 	if(player.player.handCards.length == 0 && player.player.tappedCards.length == 0)
@@ -304,11 +315,12 @@ danishGameRules.prototype.playTableCard = function (player, id) {
 		if(!this.playCards(player, [player.player.tableCards[id]]))
 		{
 			this.playingStack[this.playingStack.length] = player.player.tableCards[id];
-			this.hostRoom.playerManager.broadcastNewStackCards([player.player.tableCards[id]]);
+			//Broadcast it so players know what the player got
+			this.hostRoom.playerManager.broadcastNewStackCards([player.player.tableCards[id]]); 
 			this.playerTakeStack(player);
 		}
 		player.player.tableCards.splice(id,1);
-		player.broadcast.emit('played table card', player.player.name);
+		this.hostRoom.sockets.emit('played table card', player.player.name);
 		this.checkEndGame();
 	}
 }
@@ -324,14 +336,22 @@ danishGameRules.prototype.aceTarget = function (name) {
 }
 danishGameRules.prototype.checkEndGame = function () {
 	var playerWithCards = 0;
-	for (var i = this.hostRoom.playerManager.players.length - 1; i >= 0; i--) {
-		if(this.hostRoom.playerManager.players[i].player.hasCards())
+	var aiWithCards = 0;
+	var list = this.hostRoom.playerManager.players;
+	for (var i = list.length - 1; i >= 0; i--) {
+		console
+		if(list[i].player.hasCards())
 		{
-			playerWithCards += 1;
+			if(!list[i].player.isAI)
+				playerWithCards += 1;
+			else
+				aiWithCards += 1;
 		}
 	};	
-	if(playerWithCards <= 1)
+	if(playerWithCards + aiWithCards <= 1 || playerWithCards < 1){
 		this.endGame();
+		return true;
+	}
 }
 danishGameRules.prototype.endGame = function () {
 	if(this.hostRoom.gameState.value == 0)
@@ -344,8 +364,8 @@ danishGameRules.prototype.endGame = function () {
     	this.hostRoom.playerManager.players[i].player.ready = false;
 	};
 
-	this.hostRoom.sockets.emit('gameEnd');
-	this.hostRoom.sockets.emit('currentState', {	playingStack: this.playingStack,
+	this.hostRoom.sockets.emit('game end');
+	this.hostRoom.sockets.emit('current state', {	playingStack: this.playingStack,
 												pickingStackSize: this.playingDeck.length, 
 												gameState: this.hostRoom.gameState, 
 												players: this.hostRoom.playerManager.getPlayerList()	});

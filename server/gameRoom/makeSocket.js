@@ -20,8 +20,7 @@ module.exports = function() {
 		this.hostRoom.playerManager.setPlayerUnready(this);
 	});
 	this.on('set tapped card', function (card) {
-		if(this.hostRoom.playerManager.tappedCard(this, card))
-			this.broadcast.to(this.hostRoom.roomName).emit('tapped card', {name: this.player.name, card: card});
+		this.hostRoom.playerManager.tappedCard(this, card)
 	});
 	this.on('play cards', function (cards) {
 		this.hostRoom.gameRules.playCards(this, cards);

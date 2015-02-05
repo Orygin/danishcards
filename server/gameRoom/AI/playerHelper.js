@@ -1,7 +1,7 @@
-function playerHelper(ai) { // Player helper for AI
+function playerHelper(ai, host) { // Player helper for AI
 	this.Ai = ai;
-
-	this.pManager = require('../playerManager');
+	this.hostRoom = host;
+	this.playerManager = host.playerManager;
 }
 
 playerHelper.prototype.forEachPlayer = function(fct) {
@@ -27,7 +27,10 @@ playerHelper.prototype.forEachNonAI = function(fct) {
 };
 
 playerHelper.prototype.getPlayerList = function() {
-	return this.pManager.getPlayerList();
+	return this.playerManager.getPlayerList();
+};
+playerHelper.prototype.playerHasCards = function (player) {
+	return (player.playingHand != 0 || player.tappedHand.length != 0 || player.tableHand != 0);
 };
 
 module.exports = playerHelper;

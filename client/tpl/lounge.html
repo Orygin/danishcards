@@ -1,13 +1,13 @@
 <div ng-controller="loungeCtrl">
 	<div class="title">Lounge</div>
 	<div class="loungePageContainer">
-		<div class="roomService" ng-class="{roomServiceEclipsed: RoomCreation}">
+		<div class="roomService" ng-show="!RoomCreation">
 			<div class="room" ng-repeat="room in lounge.rooms" ng-click="joinRoom(room)" ng-class="{roomCheats: room.cheats, privateRoom: !room.public}">
 				{{room.name}}<br>{{room.gameState.name}}
 				<div class="backgroundProgress" ng-style="{width: (room.players/room.maxPlayers)*100+'%'}">{{room.players}}/{{room.maxPlayers}}</div>
 			</div>
 		</div>
-		<div class="createRoom" ng-class="{createRoomEclipsed: RoomCreation}">
+		<div class="createRoom" ng-show="RoomCreation">
 		  <div class="form-group">
 		    <label for="inputRoom3" class="col-sm-2 control-label">Room name</label>
 		    <div class="col-sm-10">

@@ -4,11 +4,13 @@ socket = function(parent)
 	this.cb = [];
 };
 
-socket.prototype.emit = function(name) {
-	if(this.cb[name] === undefined)
+socket.prototype.emit = function(name, value) {
+	if(this.cb[name] === undefined){
+		console.log("Tried to call undefined callback : ", name);
 		return;
+	}
 
-	this.cb[name].call(this.parent);
+	this.cb[name].call(this.parent, value);
 };
 
 socket.prototype.on = function(name, fct) {

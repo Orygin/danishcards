@@ -25,7 +25,7 @@ playerManager.prototype.addPlayer = function (socket, name){
 
 	this.players[this.players.length] = socket;
 
-	socket.broadcast.to(this.hostRoom.roomName).emit('user connected', name);
+	this.hostRoom.sockets.emit('user connected', name);
 
 	return 'ok';
 }
@@ -35,10 +35,13 @@ playerManager.prototype.addAI = function(name) {
 		return 'name';
 	}// bots may not take an already existing account name (which would prevent a player from connecting)
 
-	var bot = new baseBot();
+	var bot = new baseBot(this.hostRoom);
 	bot.io = this.hostRoom.io;
 	bot.isAi = true;
-	return this.addPlayer(bot, name);
+	var res = this.addPlayer(bot, name);
+	bot.player.isAI = true;
+	bot.activate();
+	return res;
 }
 
 playerManager.prototype.getPlayer = function (name)
@@ -128,6 +131,13 @@ playerManager.prototype.setAIReady = function(name) {
 	this.setPlayerReady(plr);
 	return true;
 }
+playerManager.prototype.setAllAIReady = function() {
+	this.forEachAI(function (ai) {
+		this.setPlayerReady(ai);
+	})
+	return true;
+}
+
 playerManager.prototype.setAIUnready = function(name) {
 	var plr = this.getPlayer(name);
 	if(!plr)
@@ -156,8 +166,9 @@ playerManager.prototype.getPlayerList = function () {
 		ret[i] = {	name: this.players[i].player.name, 
 					tableHand:this.players[i].player.tableCards.length, 
 					playingHand: this.players[i].player.handCards.length, 
-					tappedHand: this.players[i].player.tappedCards};
-	};
+					tappedHand: this.players[i].player.tappedCards,
+					isAI: this.players[i].player.isAI};
+ };
 	return ret;
 }
 playerManager.prototype.broadcastPlayersHand = function () {
@@ -172,12 +183,12 @@ playerManager.prototype.broadcastPlayersTableSize = function () {
 	};	
 }
 playerManager.prototype.broadcastPlayerHandSize = function (player) {
-	player.broadcast.to(this.hostRoom.roomName).emit('playing hand size', {name: player.player.name, size: player.player.handCards.length});
+	this.hostRoom.sockets.emit('playing hand size', {name: player.player.name, size: player.player.handCards.length});
 }
 playerManager.prototype.tappedCard = function (socket, card) {
 	if(socket.player.tappedCards.length >= 3)
 		return false;
-
+	console.dir(card);
 	socket.player.tappedCards[socket.player.tappedCards.length] = card;
 	for (var i = socket.player.handCards.length - 1; i >= 0; i--) {
 		if(this.hostRoom.gameRules.cardsEqual(socket.player.handCards[i], card))
@@ -185,6 +196,7 @@ playerManager.prototype.tappedCard = function (socket, card) {
 	}
 	this.broadcastPlayerHandSize(socket);
 	this.checkAllPlayerTapped();
+	this.hostRoom.sockets.emit('tapped card', {name: socket.player.name, card: card});
 	return true;
 }
 playerManager.prototype.checkAllPlayerTapped = function () {
@@ -213,7 +225,7 @@ playerManager.prototype.broadcastCutStack = function () {
 playerManager.prototype.forEachAI = function(fct) {
 	for (var i = this.players.length - 1; i >= 0; i--) {
 		if(this.players[i].player.isAI)
-			fct(this.players[i]);
+			fct.call(this, this.players[i]);
 	};
 };
 playerManager.prototype.forEachNonAI = function(fct) {
