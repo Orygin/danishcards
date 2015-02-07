@@ -3,10 +3,10 @@
   "description": "Card game online",
   "version": "1.0.0",
   "private": false,
-    "scripts": {
+  "scripts": {
     "start": "supervisor server/server.js"
   },
-  "main": "server/server.js"
+  "main": "server/server.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Orygin/danishcards.git"
