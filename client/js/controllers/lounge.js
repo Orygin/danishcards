@@ -3,6 +3,16 @@ function loungeCtrl($scope, $modal) {
 	$scope.toPost =  {};
 	$scope.socket.on('update lounge', function (data) {
 		$scope.$apply(function () {
+			for (var i = data.posts.length - 1; i >= 0; i--) {
+				var found = false;
+				for (var j = $scope.lounge.posts.length - 1; j >= 0; j--) {
+					if($scope.lounge.posts[j] == data.posts[i]){
+						found = true;
+					}
+				};	
+				if (!found)
+					$scope.lounge.posts[$scope.lounge.posts.length] = data.posts[i];
+			};
 			$scope.lounge = data;
 		});
 	});

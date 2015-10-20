@@ -10,6 +10,7 @@ postManager.prototype.getPostsFrom = function (pos){
 };
 postManager.prototype.addPost = function (post) {
 	console.log(post);
+	post.id = this.posts.length;
 	this.posts[this.posts.length] = post;
 }
 module.exports = new postManager();
