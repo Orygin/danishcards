@@ -90,6 +90,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		socket.on('join lounge', function () {
 			$scope.$apply(function () {
 				$scope.connectionStatus = "lounge";
+				$scope.lounge =[];
 			});
 		});
 		socket.on('join room', function (data) {
