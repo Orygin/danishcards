@@ -1,6 +1,24 @@
 <div ng-controller="loungeCtrl">
-	<div class="title">Lounge</div>
+	<div class="title titleSmall">Lounge</div>
+	<div class="postsContainer">
+	<div class="title titleXSmall">Music</div>
+		<div class="addPost">
+			<input type="text" class="postText" placeholder="Message" ng-model="toPost.message"/>
+			<input type="text" class="postTextHalf" placeholder="Artist name (optional)" ng-model="toPost.artist"/>
+			<input type="text" class="postTextHalf" placeholder="Track name (optional)" ng-model="toPost.trackname"/>
+			<input type="text" class="postTextHalf" placeholder="Genre" ng-model="toPost.genre"/>
+			<input type="text" class="postTextHalf" placeholder="Video url" ng-model="toPost.url"/>
+			<input type="submit" ng-click="addPost()" class="postSubmit" text="+" />
+		</div>
+		<div class="post" ng-repeat="post in lounge.posts">
+			<p>{{post.message}}</p>
+			<p>{{post.artist}} - {{post.trackname}} - {{post.genre}}</p>
+			<youtube-video video-url="post.url"></youtube-video>
+		</div>
+	</div>
+
 	<div class="loungePageContainer">
+	<div class="title titleXSmall">Danish</div>
 		<div class="roomService" ng-show="!RoomCreation">
 			<div class="room" ng-repeat="room in lounge.rooms" ng-click="joinRoom(room)" ng-class="{roomCheats: room.cheats, privateRoom: !room.public}">
 				{{room.name}}<br>{{room.gameState.name}}
@@ -34,10 +52,11 @@
 				<button type="submit" class="btn btn-primary btn-sm" ng-click="createRoom()">Create room</button>
 			</div>
 		</div>
-	</div>
-	<div 	class="loungeButton" 
+		<div 	class="loungeButton" 
 			ng-init="RoomCreation = false" 
 			ng-click="RoomCreation = !RoomCreation">{{RoomCreation ? 'Back' : 'Create room'}}</div>
+	</div>
+	
 	<script type="text/ng-template" id="passwordContent.html">
         <div class="modal-header">
             <h3>Room is protected with a password!</h3>

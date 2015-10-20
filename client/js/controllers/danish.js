@@ -1,4 +1,4 @@
-var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.directives', 'angular-audio-player', 'danishDirectives', 'ngSanitize'])
+var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.directives', 'angular-audio-player', 'danishDirectives', 'ngSanitize', 'youtube-embed'])
 
 .controller('Main', function ($scope, $location, $window){
 	$scope.alerts = [];
@@ -30,7 +30,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	};
 
 	$scope.connectionStatus = "disconnected";
-	$scope.footerData = 'Game created by Louis Geuten. Graciously hosted by Maxime Robaux. Source available on <a href="https://github.com/Orygin/danishcards">github</a>';
+	$scope.footerData = 'Game created by Louis Geuten. Source available on <a href="https://github.com/Orygin/danishcards">github</a>';
 
 	$scope.connect = function (playerName, password) {
 		if(playerName === "" || playerName === undefined ||password === "" || password === undefined)
@@ -87,10 +87,9 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 
 			socket.removeAllListeners();
 		});
-		socket.on('join lounge', function (data) {
+		socket.on('join lounge', function () {
 			$scope.$apply(function () {
 				$scope.connectionStatus = "lounge";
-				$scope.lounge = data;
 			});
 		});
 		socket.on('join room', function (data) {

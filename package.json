@@ -12,6 +12,7 @@
     "url": "https://github.com/Orygin/danishcards.git"
   },
   "dependencies": {
+    "angular-youtube-embed": "^1.1.1",
     "express": "3.4.8",
     "socket.io": "1.1.0"
   }

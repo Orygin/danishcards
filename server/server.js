@@ -32,6 +32,9 @@ io.sockets.on('connection', function (socket) {
 
     makeSocket.call(socket);
   });
+  socket.on('add post', function (data) {
+    roomService.addPost(socket, data);
+  })
   socket.on('join room', function (data) {
       roomService.joinRoom(socket, data.roomName, data.password);
   });

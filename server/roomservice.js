@@ -38,12 +38,29 @@ roomService.prototype.think = function(self) {
 	setTimeout(self.think, self.roomDelay, self);
 };
 roomService.prototype.joinLounge = function(socket, name) {
-	var ret = {};
-    ret.player = require('./accountManager').getAccount(name);
-    ret.rooms = this.getRoomsInfos();
+	var ret = this.getLoungeUpdateInfos();
+	ret.player = require('./accountManager').getAccount(name);
     socket.emit('join lounge', ret);
     this.loungePlayers[this.loungePlayers.length] = socket;
+    this.updateLounge();
 };
+roomService.prototype.addPost = function (socket, data) {
+	require('./postManager').addPost(data);
+	this.updateLounge();
+};
+
+roomService.prototype.getPosts = function (socket, pos) {
+	socket.emit('get posts', require('./postManager').getPostsFrom(pos));
+	
+};
+roomService.prototype.getConnectedUsers = function () {
+	var users = [];
+	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
+		users[i] = {};
+		users[i].name =this.loungePlayers[i].name;
+	};
+	return users;
+}
 roomService.prototype.getRoomsInfos = function() {
 	var ret = [], i = 0;
 	for(var r in this.playingRooms)
@@ -91,8 +108,15 @@ roomService.prototype.leaveRoom = function(socket, name) {
 	this.joinLounge(socket, socket.name);
 	this.updateLounge();
 };
+roomService.prototype.getLoungeUpdateInfos = function () {
+	var ret = {};
+    ret.posts = require('./postManager').getPosts();
+    ret.rooms = this.getRoomsInfos();
+    ret.connectedUsers = this.getConnectedUsers();
+    return ret;
+}
 roomService.prototype.updateLounge = function() {
-	var ret = this.getRoomsInfos();
+	var ret = this.getLoungeUpdateInfos(); 
 
 	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
 		this.loungePlayers[i].volatile.emit('update lounge', ret);

@@ -1,10 +1,14 @@
 function loungeCtrl($scope, $modal) {
 	$scope.room = {};
+	$scope.toPost =  {};
 	$scope.socket.on('update lounge', function (data) {
 		$scope.$apply(function () {
-			$scope.lounge.rooms = data;
+			$scope.lounge = data;
 		});
 	});
+	$scope.addPost = function () {
+		$scope.socket.emit('add post', $scope.toPost);
+	}
 	$scope.joinRoom = function (room) {
 		if(!room.public)
 			return $scope.createModalPassword(room);
