@@ -6,7 +6,7 @@ function loungeCtrl($scope, $modal) {
 			for (var i = data.posts.length - 1; i >= 0; i--) {
 				var found = false;
 				for (var j = $scope.lounge.posts.length - 1; j >= 0; j--) {
-					if($scope.lounge.posts[j] == data.posts[i]){
+					if($scope.lounge.posts[j].id == data.posts[i].id){
 						found = true;
 					}
 				};	
