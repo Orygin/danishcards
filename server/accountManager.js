@@ -37,9 +37,9 @@ simpleAccountManager.prototype.getAccount = function(name) {
 };
 simpleAccountManager.prototype.connect = function(name, pw) {
 	var acc = this.getAccount(name);
-	
+
 	if(!acc)
-		return this.addAccount(name, pw);
+		return false;
 
 	if(acc.password == pw && !acc.isKicked())
 		return true;

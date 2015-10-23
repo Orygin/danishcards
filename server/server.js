@@ -21,6 +21,7 @@ app.use(express.static(process.env.PWD + '/client/'));
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+var registerKey = "abc";
 
 server.listen(server_port, server_ip_address);
 
@@ -37,6 +38,13 @@ io.sockets.on('connection', function (socket) {
   socket.on('disconnect', function () {
     roomService.playerDisconnect(socket);
   });
+  socket.on('register', function (data) {
+    if(data.key == registerKey)
+      if(!accountManager.addAccount(data.username, data.password))
+        socket.emit('fail', 'failed register name')
+    else
+      socket.emit('fail', 'failed register key');
+  })
   socket.on('add post', function (data) {
     roomService.addPost(socket, data);
   })

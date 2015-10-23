@@ -67,6 +67,13 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 		          $scope.addAlert('Couldn\'t log in', 'danger');
 		          socket.disconnect();	
 		        }
+		        else if (name == 'failed register name')
+		        {
+		        	$scope.addAlert('Couldn\'t register that username', 'danger');
+		        }
+		        else if (name == 'failed register name'){
+		        	$scope.addAlert('Key is incorrect', 'danger');
+		        }
 		        else if (name == 'failed login')
 		        {
 		          $scope.connectionStatus = "disconnected";
@@ -109,7 +116,7 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.getNumber = function(num) {
 		return new Array(num);   
 	};
-	
+
 	if(angular.isDefined($cookieStore.get('username'))){
         $scope.connect($cookieStore.get('username'), $cookieStore.get('password'));
     }
