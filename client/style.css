@@ -151,7 +151,7 @@ a:hover{
 	display: inline-block;
 }
 .createRoom{
-	width: 650px;
+	width: 420px;
 	padding: 5px;
 	min-height: 300px;
 	max-height: 500px;
@@ -167,7 +167,7 @@ a:hover{
 	vertical-align: middle;
 }
 .room{
-	width: 640px;
+	width: 400px;
 	min-height: 48px;
 	margin-bottom: 5px;
 	cursor: pointer;
@@ -214,6 +214,7 @@ a:hover{
 	background-color: white;
 }
 .post {
+	margin-top: 8px;
 		border: 1px solid black;
 	box-shadow: 1px 1px 1px 1px;
 	padding: 2px;

@@ -7,14 +7,16 @@ function roomService() {
 	this.playingRooms = [];
 	this.loungePlayers = [];
 
-	this.roomDelay = 60*1000; // check every 60 seconds
-	setTimeout(this.think, this.roomDelay, this);
+	this.delay = 60*1000; // check every 60 seconds
+	setTimeout(this.think, this.delay, this);
 };
 
 roomService.prototype.createRoom = function(data) {
 	if(this.getRoom(data.roomName) !== undefined)
 		return false;
-
+	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
+		console.log(this.loungePlayers[i]);
+	};
 	this.playingRooms[data.roomName] = new room(data, this);
 	this.updateLounge();
 
@@ -35,16 +37,17 @@ roomService.prototype.think = function(self) {
 		}
 	}
 	self.updateLounge();
-	setTimeout(self.think, self.roomDelay, self);
+	setTimeout(self.think, self.delay, self);
 };
 roomService.prototype.joinLounge = function(socket, name) {
+    this.loungePlayers[this.loungePlayers.length] = socket;
 	var ret = this.getLoungeUpdateInfos();
 	ret.player = require('./accountManager').getAccount(name);
     socket.emit('join lounge', ret);
-    this.loungePlayers[this.loungePlayers.length] = socket;
     this.updateLounge();
 };
 roomService.prototype.addPost = function (socket, data) {
+	data.user = socket.playerName;
 	require('./postManager').addPost(data);
 	this.updateLounge();
 };
@@ -57,7 +60,7 @@ roomService.prototype.getConnectedUsers = function () {
 	var users = [];
 	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
 		users[i] = {};
-		users[i].name =this.loungePlayers[i].name;
+		users[i].playerName = this.loungePlayers[i].playerName;
 	};
 	return users;
 }
@@ -78,12 +81,12 @@ roomService.prototype.joinRoom = function(socket, name, pass) {
 	var room = this.playingRooms[name];
 
 	if(room === undefined){
-		socket.emit('error', 'fail join room exist');
+		socket.emit('fail', 'fail join room exist');
 		return false;
 	}
 
 	if(!room.canJoin(socket, pass)){
-		socket.emit('error', 'fail join room password');
+		socket.emit('fail', 'fail join room password');
 		return false;
 	}
 
@@ -108,6 +111,18 @@ roomService.prototype.leaveRoom = function(socket, name) {
 	this.joinLounge(socket, socket.name);
 	this.updateLounge();
 };
+roomService.prototype.playerDisconnect = function (socket) {
+	if(socket.hostRoom !== undefined)
+		socket.hostRoom.playerLeave(socket);
+	else{
+		for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
+			if(this.loungePlayers[i] === socket){
+				this.loungePlayers.splice(i,1);
+				this.updateLounge();
+			}
+		};
+	}
+}
 roomService.prototype.getLoungeUpdateInfos = function () {
 	var ret = {};
     ret.posts = require('./postManager').getPosts();

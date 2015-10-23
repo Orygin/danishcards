@@ -1,6 +1,6 @@
-var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.directives', 'angular-audio-player', 'danishDirectives', 'ngSanitize', 'youtube-embed'])
+var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.directives', 'angular-audio-player', 'danishDirectives', 'ngSanitize', 'youtube-embed', 'ngCookies'])
 
-.controller('Main', function ($scope, $location, $window){
+.controller('Main', function ($scope, $location, $window, $cookieStore){
 	$scope.alerts = [];
 	$scope.addAlert = function(mesg, level) {
 		$scope.alerts.push({msg: mesg, type: level});
@@ -42,6 +42,8 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 
 		$scope.playerName = playerName;
 		$scope.password = password;
+		$cookieStore.put('username', playerName);
+		$cookieStore.put('password', password);
 	}
 	$scope.createSocketOn = function(socket) {
 		socket.on('connect', function () {
@@ -50,8 +52,9 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 			});
 			socket.emit('activate', {name: $scope.playerName, pw: $scope.password});
 		});
-		socket.on('error', function (name, value) {
+		socket.on('fail', function (name) {
 	    	$scope.$apply(function(){
+	    		console.log(name);
 		        if(name == 'too many players')
 		        {
 		          $scope.connectionStatus = "disconnected";
@@ -87,10 +90,11 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 
 			socket.removeAllListeners();
 		});
-		socket.on('join lounge', function () {
+		socket.on('join lounge', function (data) {
 			$scope.$apply(function () {
+							console.dir(data);
 				$scope.connectionStatus = "lounge";
-				$scope.lounge =[];
+				$scope.lounge = data;
 			});
 		});
 		socket.on('join room', function (data) {
@@ -105,6 +109,10 @@ var app = angular.module('danish', ['ui.keypress', 'ui.bootstrap', 'luegg.direct
 	$scope.getNumber = function(num) {
 		return new Array(num);   
 	};
+	
+	if(angular.isDefined($cookieStore.get('username'))){
+        $scope.connect($cookieStore.get('username'), $cookieStore.get('password'));
+    }
 });
 app.controller('githubLog', function ($scope){
 	var script = document.createElement('script');
