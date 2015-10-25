@@ -1,13 +1,20 @@
 <div class="title">Dewez.JS</div>
 <div class="connexionBox">
 	<form>
-		<input type="text" class="form-control" ng-model="playerName" value="" autofocus\><br>
-		<input type="password" ng-model="password" class="form-control"  value="" autofocus\><br>
+		<input type="text" class="form-control" ng-model="playerName" value="" placeholder="user name" autofocus\><br>
+		<input type="password" ng-model="password" class="form-control" value="" placeholder="password"\><br>
+		<input type="key" ng-model="key" class="form-control"  value="" ng-hide="!registering" placeholder="registration key"\><br ng-hide="!registering">
 		<input 	type="submit" 
-				class="btn btn-primary btn-sm"
+				class="btn btn-primary btn-sm btn-connectionBox"
+				value="Register" 
+				ng-click="register(playerName, password, key)" 
+				ng-disabled="connectionStatus == 'connecting'">
+		<input 	type="submit" 
+				class="btn btn-primary btn-sm btn-connectionBox"
 				value="Connect" 
 				ng-click="connect(playerName, password)" 
-				ng-disabled="connectionStatus == 'connecting'">
+				ng-disabled="connectionStatus == 'connecting'"
+				ng-hide="registering">
 	</form>
 </div>
 <div ng-controller="githubLog" class="ghLog">

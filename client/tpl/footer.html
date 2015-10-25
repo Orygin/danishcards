@@ -1,4 +1,5 @@
 <div ng-include="'tpl/soundTpl.html'" style="float:left"></div>
+<div ng-click="disconnect()"  style="float:right">Disconnect</div>
 <div ng-show="connectionStatus == 'inroom'" style="width:80%; margin-right: auto; margin-left: auto;">
 	Room {{lastRoomName}} - <span ng-click="leaveRoom()" style="cursor:pointer">Leave room</span>
 </div>

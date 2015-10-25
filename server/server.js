@@ -40,7 +40,13 @@ io.sockets.on('connection', function (socket) {
   });
   socket.on('register', function (data) {
     if(data.key == registerKey)
-      if(!accountManager.addAccount(data.username, data.password))
+      if(accountManager.addAccount(data.name, data.pw)){
+        socket.playerName = data.name;
+        roomService.joinLounge(socket, data.name);
+
+        makeSocket.call(socket);
+      }
+      else
         socket.emit('fail', 'failed register name')
     else
       socket.emit('fail', 'failed register key');
