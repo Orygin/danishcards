@@ -19,7 +19,7 @@ roomService.prototype.createRoom = function(data) {
 		gameRules = require('./danish/danishGameRules')
 		playerManager = require('./danish/playerManager')
 	} else if(data.gameRules === 'loupGarou'){
-		gameRules = require('./loupgarou/danishGameRules')
+		gameRules = require('./loupgarou/gameRules')
 		playerManager = require('./loupgarou/playerManager')
 	}
 

@@ -7,6 +7,7 @@ function playerManager(host){
 	this.players= [];
 	this.hostRoom = host;
 }
+
 playerManager.prototype.addPlayer = function (socket, name){
 	if(this.players.length >= this.hostRoom.maxPlayers){
 		socket.emit('error', 'too many players', this.hostRoom.maxPlayers);
@@ -52,7 +53,6 @@ playerManager.prototype.getPlayer = function (name)
   return false;
 }
 playerManager.prototype.removePlayer = function (socket){
-	console.trace();
 	if(socket.player === undefined)
 		return false;
 
@@ -143,11 +143,7 @@ playerManager.prototype.getPlayers = function () {
 playerManager.prototype.getPlayerList = function () {
 	var ret = [];
 	for (var i = this.players.length - 1; i >= 0; i--) {
-		ret[i] = {	name: this.players[i].player.name, 
-					tableHand:this.players[i].player.tableCards.length, 
-					playingHand: this.players[i].player.handCards.length, 
-					tappedHand: this.players[i].player.tappedCards,
-					isAI: this.players[i].player.isAI};
+		ret[i] = {	name: this.players[i].player.name };
  };
 	return ret;
 }

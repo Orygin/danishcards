@@ -1,13 +1,32 @@
 // Manages players and AIs
 
-var BaseClass = require('../gameRoom/playerManager');
+var BaseClass = require('../gameRoom/playerManager'),
 	Player = require('./player'),
+	makeSocket = require('./makeSocket');
+
 playerManager.prototype = new BaseClass();
+playerManager.prototype.parent = BaseClass.prototype;
 
 function playerManager(host){
 	this.players= [];
 	this.hostRoom = host;
 	this.playerClass = Player;
+}
+playerManager.prototype.addPlayer = function (socket, name){
+	BaseClass.prototype.addPlayer.call(this, socket, name);
+	makeSocket.call(socket);
+}
+
+playerManager.prototype.getPlayerList = function () {
+	var ret = [];
+	for (var i = this.players.length - 1; i >= 0; i--) {
+		ret[i] = {	name: this.players[i].player.name, 
+					tableHand:this.players[i].player.tableCards.length, 
+					playingHand: this.players[i].player.handCards.length, 
+					tappedHand: this.players[i].player.tappedCards,
+					isAI: this.players[i].player.isAI};
+ };
+	return ret;
 }
 playerManager.prototype.emptyHand = function(socket) {
 	var b = this.hostRoom.gameRules.playingDeck.length;

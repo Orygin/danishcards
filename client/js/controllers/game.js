@@ -34,7 +34,7 @@ function gameCtrl ($scope) {
 		$scope.socket.on('current state', function (data) {
 			$scope.$apply(function () {
 				$scope.glog += 'Joined to room : ' + data.roomName + '\n';
-
+				console.dir(data);
 				$scope.setLastRoomName(data.roomName);
 				$scope.players = data.players;
 				$scope.gameState = data.gameState;
