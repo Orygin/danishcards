@@ -1,13 +1,14 @@
 //This was exported to its own module so it can be called on the fakeSocket of AIs as well as player's socket
 
-module.exports = function() {
+module.exports.make = function() {
 	this.on('get current state', function () {
 		this.emit('current state', {	playingStack: this.hostRoom.gameRules.playingStack,
 										pickingStackSize: this.hostRoom.gameRules.playingDeck.length, 
 										gameState: this.hostRoom.gameState, 
 										players: this.hostRoom.playerManager.getPlayerList(),
 										availableCommands: this.hostRoom.gameChat.getCommandList(),
-										roomName: this.hostRoom.roomName	});
+										roomName: this.hostRoom.roomName,
+										gameName: this.hostRoom.gameName	});
 	});
 	this.on('set tapped card', function (card) {
 		this.hostRoom.playerManager.tappedCard(this, card)
@@ -25,3 +26,11 @@ module.exports = function() {
 		this.hostRoom.gameRules.aceTarget(name);
 	});
 };
+module.exports.remove = function () {
+	this.removeAllListeners('get current state');
+	this.removeAllListeners('set tapped card');
+	this.removeAllListeners('play cards');
+	this.removeAllListeners('play table cards');
+	this.removeAllListeners('gibe stack');
+	this.removeAllListeners('ace target');
+}

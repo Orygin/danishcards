@@ -14,7 +14,11 @@ function playerManager(host){
 }
 playerManager.prototype.addPlayer = function (socket, name){
 	BaseClass.prototype.addPlayer.call(this, socket, name);
-	makeSocket.call(socket);
+	makeSocket.make.call(socket);
+}
+playerManager.prototype.removePlayer = function (socket, name){
+	BaseClass.prototype.removePlayer.call(this, socket);
+	makeSocket.remove.call(socket);
 }
 
 playerManager.prototype.getPlayerList = function () {

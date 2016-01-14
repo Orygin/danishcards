@@ -30,6 +30,7 @@ function playRoom(data, roomService, gameRules, playerManager) {
 	this.password = data.password;
 	this.cheats = data.cheats;
 	this.owner = data.owner;
+	this.gameName = data.gameRules;
 	this.maxPlayers = 5;
 	this.gameState = this.GAMESTATES.NOTPLAYING;
 	this.rcon = 'sauce';
@@ -78,6 +79,7 @@ playRoom.prototype.getInfos = function() {
 			cheats: this.cheats,
 			maxPlayers: this.maxPlayers,
 			gameState: this.gameState,
+			gameName: this.gameName,
 			players: this.playerManager.players.length};
 };
 playRoom.prototype.canJoin = function(socket, pass) {

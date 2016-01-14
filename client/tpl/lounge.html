@@ -21,7 +21,7 @@
 	<div class="title titleXSmall">Danish</div>
 		<div class="roomService" ng-show="!RoomCreation">
 			<div class="room" ng-repeat="room in lounge.rooms" ng-click="joinRoom(room)" ng-class="{roomCheats: room.cheats, privateRoom: !room.public}">
-				{{room.name}}<br>{{room.gameState.name}}
+				{{room.name}}<br>{{room.gameName}} - {{room.gameState.name}}
 				<div class="backgroundProgress" ng-style="{width: (room.players/room.maxPlayers)*100+'%'}">{{room.players}}/{{room.maxPlayers}}</div>
 			</div>
 		</div>
