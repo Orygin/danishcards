@@ -1,10 +1,6 @@
 //This was exported to its own module so it can be called on the fakeSocket of AIs as well as player's socket
 
 module.exports = function() {
-	this.on('disconnect', function () {
-		if(this.hostRoom !== undefined)
-			this.hostRoom.playerManager.removePlayer(this);
-	});
 	this.on('get current state', function () {
 		this.emit('current state', {	playingStack: this.hostRoom.gameRules.playingStack,
 										pickingStackSize: this.hostRoom.gameRules.playingDeck.length, 

@@ -4,10 +4,12 @@ var express = require('express'),
     server = http.createServer(app),
     io = require('socket.io').listen(server),
     accountManager = require('./accountManager'),
+    postManager = require('./postManager'),
     makeSocket = require('./gameRoom/makeSocket'),
     roomService = require('./roomservice');
 
 accountManager.readFromFile();
+postManager.loadPosts();
 
 roomService.io = io;
 roomService.accountManager = accountManager;
@@ -25,13 +27,19 @@ server.listen(server_port, server_ip_address);
 io.sockets.on('connection', function (socket) {
   socket.on('activate', function (data) {
     if(!accountManager.connect(data.name, data.pw))
-      socket.emit('fail', 'failed login');
+      return socket.emit('fail', 'failed login');
 
     socket.playerName = data.name;
     roomService.joinLounge(socket, data.name);
 
     makeSocket.call(socket);
   });
+  socket.on('disconnect', function () {
+    roomService.playerDisconnect(socket);
+  });
+  socket.on('add post', function (data) {
+    roomService.addPost(socket, data);
+  })
   socket.on('join room', function (data) {
       roomService.joinRoom(socket, data.roomName, data.password);
   });
@@ -48,6 +56,7 @@ io.sockets.on('connection', function (socket) {
 
 process.on('exit', function (code) {
   accountManager.saveToFile(true);
+  postManager.savePosts();
 
   if(code == 1337){
     var exec = require('child_process').spawn,

@@ -7,13 +7,14 @@ function roomService() {
 	this.playingRooms = [];
 	this.loungePlayers = [];
 
-	this.roomDelay = 60*1000; // check every 60 seconds
-	setTimeout(this.think, this.roomDelay, this);
+	this.delay = 60*1000; // check every 60 seconds
+	setTimeout(this.think, this.delay, this);
 };
 
 roomService.prototype.createRoom = function(data) {
 	if(this.getRoom(data.roomName) !== undefined)
 		return false;
+
 	if(data.gameRules === 'danish'){
 		gameRules = require('./danish/danishGameRules')
 		playerManager = require('./danish/playerManager')
@@ -43,15 +44,33 @@ roomService.prototype.think = function(self) {
 		}
 	}
 	self.updateLounge();
-	setTimeout(self.think, self.roomDelay, self);
+	setTimeout(self.think, self.delay, self);
 };
 roomService.prototype.joinLounge = function(socket, name) {
-	var ret = {};
-    ret.player = require('./accountManager').getAccount(name);
-    ret.rooms = this.getRoomsInfos();
-    socket.emit('join lounge', ret);
     this.loungePlayers[this.loungePlayers.length] = socket;
+	var ret = this.getLoungeUpdateInfos();
+	ret.player = require('./accountManager').getAccount(name);
+    socket.emit('join lounge', ret);
+    this.updateLounge();
 };
+roomService.prototype.addPost = function (socket, data) {
+	data.user = socket.playerName;
+	require('./postManager').addPost(data);
+	this.updateLounge();
+};
+
+roomService.prototype.getPosts = function (socket, pos) {
+	socket.emit('get posts', require('./postManager').getPostsFrom(pos));
+	
+};
+roomService.prototype.getConnectedUsers = function () {
+	var users = [];
+	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
+		users[i] = {};
+		users[i].playerName = this.loungePlayers[i].playerName;
+	};
+	return users;
+}
 roomService.prototype.getRoomsInfos = function() {
 	var ret = [], i = 0;
 	for(var r in this.playingRooms)
@@ -69,12 +88,12 @@ roomService.prototype.joinRoom = function(socket, name, pass) {
 	var room = this.playingRooms[name];
 
 	if(room === undefined){
-		socket.emit('error', 'fail join room exist');
+		socket.emit('fail', 'fail join room exist');
 		return false;
 	}
 
 	if(!room.canJoin(socket, pass)){
-		socket.emit('error', 'fail join room password');
+		socket.emit('fail', 'fail join room password');
 		return false;
 	}
 
@@ -99,8 +118,27 @@ roomService.prototype.leaveRoom = function(socket, name) {
 	this.joinLounge(socket, socket.name);
 	this.updateLounge();
 };
+roomService.prototype.playerDisconnect = function (socket) {
+	if(socket.hostRoom !== undefined)
+		socket.hostRoom.playerLeave(socket);
+	else{
+		for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
+			if(this.loungePlayers[i] === socket){
+				this.loungePlayers.splice(i,1);
+				this.updateLounge();
+			}
+		};
+	}
+}
+roomService.prototype.getLoungeUpdateInfos = function () {
+	var ret = {};
+    ret.posts = require('./postManager').getPosts();
+    ret.rooms = this.getRoomsInfos();
+    ret.connectedUsers = this.getConnectedUsers();
+    return ret;
+}
 roomService.prototype.updateLounge = function() {
-	var ret = this.getRoomsInfos();
+	var ret = this.getLoungeUpdateInfos(); 
 
 	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
 		this.loungePlayers[i].volatile.emit('update lounge', ret);

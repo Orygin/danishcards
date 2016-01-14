@@ -52,6 +52,7 @@ playerManager.prototype.getPlayer = function (name)
   return false;
 }
 playerManager.prototype.removePlayer = function (socket){
+	console.trace();
 	if(socket.player === undefined)
 		return false;
 

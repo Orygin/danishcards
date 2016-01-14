@@ -105,6 +105,13 @@ a:hover{
 	background-color: rgba(0,0,0, .3);
     box-shadow: inset 0px 0px 35px 50px white;
 }
+.titleSmall{
+	font-size: 48px;
+}
+.titleXSmall{
+	font-size: 28px;
+	width: 240px;
+}
 .footer {
    width:100%;
    height:40px;
@@ -117,14 +124,25 @@ a:hover{
 	text-align: center;
 	padding-top: 5px;
 }
+.postsContainer {
+	margin-left: 42px;
+	width: 640px;
+	display: inline-block;
+}
+.addPost {
+	border: 1px solid black;
+	box-shadow: 1px 1px 1px 1px;
+	padding: 2px;
+}
 .loungePageContainer{
-	width: 655px;
+	float: right;
+	margin-right: 42px;
+	width: 420px;
 	max-height: 300px;
-	margin-right: auto;
-	margin-left: auto;
+	display: inline-block;
 }
 .roomService{
-	width: 650px;
+	width: 420px;
 	padding: 5px;
 	min-height: 300px;
 	max-height: 500px;
@@ -133,7 +151,7 @@ a:hover{
 	display: inline-block;
 }
 .createRoom{
-	width: 650px;
+	width: 420px;
 	padding: 5px;
 	min-height: 300px;
 	max-height: 500px;
@@ -149,7 +167,7 @@ a:hover{
 	vertical-align: middle;
 }
 .room{
-	width: 640px;
+	width: 400px;
 	min-height: 48px;
 	margin-bottom: 5px;
 	cursor: pointer;
@@ -173,10 +191,31 @@ a:hover{
     text-align: left;
 }
 .loungeButton {
-	width: 650px;
+	width: 420px;
 	height: 25px;
-	margin-right: auto;
-	margin-left: auto;
 	cursor: pointer;
 	margin-top: 8px;
+}
+
+.postText, .postTextHalf, .postSubmit {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	border: none;
+	width: 100%;
+	background-color: lightgrey;
+}
+.postTextHalf {
+	width: 318px;
+	margin-right: -4px;
+	border-left: 1px black solid;
+}
+.postSubmit {
+	background-color: white;
+}
+.post {
+	margin-top: 8px;
+		border: 1px solid black;
+	box-shadow: 1px 1px 1px 1px;
+	padding: 2px;
 }
