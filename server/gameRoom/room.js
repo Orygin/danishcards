@@ -1,6 +1,4 @@
 var gameChat = require('./chat'),
-	playerManager = require('./playerManager'),
-	gameRules = require('./danishGameRules'),
 	voteSystem = require('./voteSystem'),
 	makeSocket = require('./makeSocket');
 
@@ -20,7 +18,7 @@ overlayIo.prototype.emit = function(name, data, ignore) {
 	});
 };
 
-function playRoom(data, roomService) {
+function playRoom(data, roomService, gameRules, playerManager) {
 	this.GAMESTATES = {
 		NOTPLAYING : {value: 0, name: "Not Playing"},
 		TAPPINGPHASE: {value: 1, name: "Tapping phase"},

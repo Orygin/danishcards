@@ -14,8 +14,16 @@ function roomService() {
 roomService.prototype.createRoom = function(data) {
 	if(this.getRoom(data.roomName) !== undefined)
 		return false;
+	if(data.gameRules === 'danish'){
+		gameRules = require('./danish/danishGameRules')
+		playerManager = require('./danish/playerManager')
+	} else if(data.gameRules === 'loupGarou'){
+		gameRules = require('./loupgarou/danishGameRules')
+		playerManager = require('./loupgarou/playerManager')
+	}
 
-	this.playingRooms[data.roomName] = new room(data, this);
+	this.playingRooms[data.roomName] = new room(data, this, gameRules, playerManager);
+
 	this.updateLounge();
 
 	return true;
