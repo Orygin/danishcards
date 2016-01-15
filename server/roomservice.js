@@ -141,7 +141,9 @@ roomService.prototype.updateLounge = function() {
 	var ret = this.getLoungeUpdateInfos(); 
 
 	for (var i = this.loungePlayers.length - 1; i >= 0; i--) {
-		this.loungePlayers[i].volatile.emit('update lounge', ret);
+		if (this.loungePlayers[i] !== undefined){
+			this.loungePlayers[i].volatile.emit('update lounge', ret);
+		}
 	};
 };
 roomService.prototype.kickPlayer = function(name, timeSec) {

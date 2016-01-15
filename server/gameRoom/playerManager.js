@@ -8,6 +8,10 @@ function playerManager(host){
 	this.hostRoom = host;
 }
 
+playerManager.prototype.getPlayerClass = function (name) {
+	return new this.playerClass(name);
+}
+
 playerManager.prototype.addPlayer = function (socket, name){
 	if(this.players.length >= this.hostRoom.maxPlayers){
 		socket.emit('error', 'too many players', this.hostRoom.maxPlayers);
@@ -21,7 +25,7 @@ playerManager.prototype.addPlayer = function (socket, name){
 		return this.addPlayer(socket, name);
 	}
 
-	socket.player = new this.playerClass(name);
+	socket.player = this.getPlayerClass(name);
 
 	this.players[this.players.length] = socket;
 

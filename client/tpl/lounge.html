@@ -18,7 +18,7 @@
 	</div>
 
 	<div class="loungePageContainer">
-	<div class="title titleXSmall">Danish</div>
+	<div class="title titleXSmall">Games</div>
 		<div class="roomService" ng-show="!RoomCreation">
 			<div class="room" ng-repeat="room in lounge.rooms" ng-click="joinRoom(room)" ng-class="{roomCheats: room.cheats, privateRoom: !room.public}">
 				{{room.name}}<br>{{room.gameName}} - {{room.gameState.name}}
