@@ -10,25 +10,32 @@ function roomService() {
 	this.delay = 60*1000; // check every 60 seconds
 	setTimeout(this.think, this.delay, this);
 };
+roomService.prototype.postInit = function () {
+	this.createLoupGarou("Dewez");
+}
 
-roomService.prototype.createRoom = function(data) {
+roomService.prototype.createRoom = function(data, game) {
 	if(this.getRoom(data.roomName) !== undefined)
 		return false;
 
-	if(data.gameRules === 'danish'){
-		gameRules = require('./danish/danishGameRules')
-		playerManager = require('./danish/playerManager')
-	} else if(data.gameRules === 'loupGarou'){
-		gameRules = require('./loupgarou/gameRules')
-		playerManager = require('./loupgarou/playerManager')
+	var autoPrune = true;
+	if(game === 'danish'){
+		room = require('./danish/room');
+	} else if(game === 'loupGarou'){
+		room = require('./loupgarou/room');
 	}
-
-	this.playingRooms[data.roomName] = new room(data, this, gameRules, playerManager);
+	this.playingRooms[data.roomName] = new room(data, this);
 
 	this.updateLounge();
 
 	return true;
 };
+roomService.prototype.createLoupGarou = function (name) {
+	var data = {roomName: name,
+				gameRules: "loupGarou"
+				};
+	this.createRoom(data, "loupGarou");
+}
 roomService.prototype.getRoom = function(roomName) {
 	return this.playingRooms[roomName];
 };
@@ -38,7 +45,8 @@ roomService.prototype.think = function(self) {
 		var ro = self.playingRooms[r];
 		if(ro === undefined)
 			continue;
-
+		if(!ro.autoPrune)
+			continue;
 		if(ro.playerManager.getPlayers().length == 0){
 			self.playingRooms[r] = undefined;
 		}

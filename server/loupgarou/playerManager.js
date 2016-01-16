@@ -1,9 +1,8 @@
 var BaseClass = require('../gameRoom/playerManager');
 	Player = require('./player'),
 	makeSocket = require('./makeSocket');
+	const util = require('util');
 
-playerManager.prototype = new BaseClass();
-playerManager.prototype.parent = BaseClass.prototype;
 
 function playerManager(host){
 	this.players = []; // Connected users in this room
@@ -12,6 +11,9 @@ function playerManager(host){
 	this.hostRoom = host;
 	this.playerClass = Player;
 }
+
+util.inherits(playerManager, BaseClass);
+
 playerManager.prototype.addPlayer = function (socket, name){
 	BaseClass.prototype.addPlayer.call(this, socket, name);
 	makeSocket.make.call(socket);
@@ -35,6 +37,6 @@ playerManager.prototype.getPlayerClass = function (name) {
 	return BaseClass.prototype.getPlayerClass.call(this, name);
 }
 playerManager.prototype.registerPlayer = function (socket) {
-	// body...
+	this.reg
 }
 module.exports = exports = playerManager

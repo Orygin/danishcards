@@ -18,7 +18,7 @@ overlayIo.prototype.emit = function(name, data, ignore) {
 	});
 };
 
-function playRoom(data, roomService, gameRules, playerManager) {
+function playRoom(data, roomService) {
 	this.GAMESTATES = {
 		NOTPLAYING : {value: 0, name: "Not Playing"},
 		TAPPINGPHASE: {value: 1, name: "Tapping phase"},
@@ -34,12 +34,13 @@ function playRoom(data, roomService, gameRules, playerManager) {
 	this.maxPlayers = 5;
 	this.gameState = this.GAMESTATES.NOTPLAYING;
 	this.rcon = 'sauce';
+	this.autoPrune = true;
 
 	this.events = [];
 	this.io = new overlayIo(roomService.io, this);
 
-	this.gameRules = new gameRules(this);
-	this.playerManager = new playerManager(this);
+	this.gameRules = this.getGameRules(this);
+	this.playerManager = this.getPlayerManager(this);
 	this.gameChat = new gameChat(this);
 	this.voteSystem = new voteSystem(this);
 	this.roomService = roomService;
@@ -47,6 +48,7 @@ function playRoom(data, roomService, gameRules, playerManager) {
 	this.on('player disconnect', function (socket) {
 		roomService.updateLounge();
 	});
+	this.postInit();
 };
 playRoom.prototype.on = function(name, fct) {
 	if(this.events[name]=== undefined)

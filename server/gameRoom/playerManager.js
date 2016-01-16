@@ -99,8 +99,10 @@ playerManager.prototype.setPlayerReady = function (socket){
 			if(!this.players[i].player.ready)
 				start = false;
 		};
-		if(start)
+		if(start){
+			console.dir(this.hostRoom.gameRules)
 			this.hostRoom.gameRules.startGame();
+		}
 	}
 }
 playerManager.prototype.setPlayerUnready = function (socket){

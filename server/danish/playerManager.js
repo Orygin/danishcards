@@ -3,15 +3,14 @@
 var BaseClass = require('../gameRoom/playerManager'),
 	Player = require('./player'),
 	makeSocket = require('./makeSocket');
-
-playerManager.prototype = new BaseClass();
-playerManager.prototype.parent = BaseClass.prototype;
+	const util = require('util');
 
 function playerManager(host){
 	this.players= [];
 	this.hostRoom = host;
 	this.playerClass = Player;
 }
+util.inherits(playerManager, BaseClass);
 playerManager.prototype.addPlayer = function (socket, name){
 	BaseClass.prototype.addPlayer.call(this, socket, name);
 	makeSocket.make.call(socket);
@@ -68,7 +67,7 @@ playerManager.prototype.broadcastPlayerHandSize = function (player) {
 playerManager.prototype.tappedCard = function (socket, card) {
 	if(socket.player.tappedCards.length >= 3)
 		return false;
-	console.dir(card);
+
 	socket.player.tappedCards[socket.player.tappedCards.length] = card;
 	for (var i = socket.player.handCards.length - 1; i >= 0; i--) {
 		if(this.hostRoom.gameRules.cardsEqual(socket.player.handCards[i], card))

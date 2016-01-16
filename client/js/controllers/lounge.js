@@ -36,8 +36,7 @@ function loungeCtrl($scope, $modal) {
 		$scope.socket.emit('create room', {	roomName: $scope.roomName,
 											cheats: $scope.cheats,
 											owner: $scope.playerName,
-											password: $scope.room.password,
-											gameRules: $scope.gameRules});
+											password: $scope.room.password});
 	};
 	$scope.createModalPassword = function(room) {
 		var modalInstance = $modal.open({

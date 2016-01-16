@@ -13,6 +13,7 @@ postManager.loadPosts();
 
 roomService.io = io;
 roomService.accountManager = accountManager;
+roomService.postInit();
 
 process.env.PWD = process.cwd()
 
@@ -20,7 +21,7 @@ app.use(express.compress());
 app.use(express.static(process.env.PWD + '/client/'));
 
 var server_port = 8080
-var server_ip_address = '127.0.0.1'
+var server_ip_address = '192.168.0.19'
 var registerKey = "abc";
 
 server.listen(server_port, server_ip_address);
@@ -61,7 +62,7 @@ io.sockets.on('connection', function (socket) {
       roomService.leaveRoom(socket, name);
   });
   socket.on('create room', function (data) {
-      if(roomService.createRoom(data))
+      if(roomService.createRoom(data, "danish"))
         roomService.joinRoom(socket, data.roomName, data.password);
       else
         socket.emit('fail', 'failed room creation');
